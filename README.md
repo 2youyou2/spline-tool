@@ -3,7 +3,7 @@
 
 ![image](https://user-images.githubusercontent.com/1862402/85509193-1d9d0c00-b628-11ea-8f1b-c87344456a89.png)
 
-Spline Tool is a Cocos Creator 3D (based on v1.1.1) plugin that allows you to create curved content.
+Spline Tool is a **Cocos Creator 3D (based on v1.1.1) Plugin** that allows you to create curved content.
  - Generalistic spline component
  - Mesh bending along spline
  - Scatter with spline area
