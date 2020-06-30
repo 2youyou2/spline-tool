@@ -93,26 +93,6 @@ export default class Scatter extends SplineUtilRenderer {
 
     protected _onDirtyChanged (value) {
         if (value) {
-            this._dirtyTime = 0;
-            this._currentItemCount = 0;
-
-            let items = this._items;
-            if (items) {
-                for (let i = 0; i < items.length; i++) {
-                    items[i].currentCount = 0;
-                }
-            }
-
-            let volumeInfos = this._volumeInfos;
-            if (volumeInfos) {
-                for (let i = 0; i < volumeInfos.length; i++) {
-                    volumeInfos[i].count = 0;
-                }
-            }
-            if (this._selfVolumeInfo) {
-                this._selfVolumeInfo.count = 0;
-            }
-
             this._updateVolume();
 
             this._dirty = true;
@@ -452,7 +432,31 @@ export default class Scatter extends SplineUtilRenderer {
         });
     }
 
+    protected _resetState () {
+        this._dirtyTime = 0;
+        this._currentItemCount = 0;
+
+        let items = this._items;
+        if (items) {
+            for (let i = 0; i < items.length; i++) {
+                items[i].currentCount = 0;
+            }
+        }
+
+        let volumeInfos = this._volumeInfos;
+        if (volumeInfos) {
+            for (let i = 0; i < volumeInfos.length; i++) {
+                volumeInfos[i].count = 0;
+            }
+        }
+        if (this._selfVolumeInfo) {
+            this._selfVolumeInfo.count = 0;
+        }
+    }
+
     protected _updateVolume () {
+        this._resetState();
+
         let infos = this._volumeInfos;
         infos.length = 0;
         let totalVolume = 0;
