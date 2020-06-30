@@ -11,6 +11,8 @@ Spline Tool is a **Cocos Creator 3D (based on v1.1.1) Plugin** that allows you t
  - Easy-to-use editor
  - Complete mathematical Bézier curves
  - Strong real-time performances
+ 
+More Informations please visit [wiki](https://github.com/2youyou2/spline-tool/wiki)
 
 Online Demo : http://2youyou2.com/spline-tool-examples/
 
