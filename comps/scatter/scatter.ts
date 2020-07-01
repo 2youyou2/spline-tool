@@ -19,7 +19,7 @@ let tempEuler = new Vec3();
 let tempRay = geometry.ray.create();
 let tempMat4 = new Mat4();
 let tempQuat = new Quat();
-let invertParentMatrix = new Mat4();
+let invertMatrix = new Mat4();
 
 let tempVec3 = new Vec3();
 
@@ -342,7 +342,7 @@ export default class Scatter extends SplineUtilRenderer {
             }
         }
 
-        Vec3.transformMat4(randomPos, randomPos, invertParentMatrix);
+        Vec3.transformMat4(randomPos, randomPos, invertMatrix);
 
         return randomPos;
     }
@@ -350,7 +350,7 @@ export default class Scatter extends SplineUtilRenderer {
     public compute () {
         if (this._items.length <= 0 || !this._hasValidItem) return;
 
-        Mat4.invert(invertParentMatrix, this.node.parent.worldMatrix);
+        Mat4.invert(invertMatrix, this.node.worldMatrix);
         if (this._currentItemCount < this._itemCount) {
             let items = this._items;
 
