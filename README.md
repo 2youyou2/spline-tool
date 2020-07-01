@@ -16,6 +16,10 @@ More Informations please visit [wiki](https://github.com/2youyou2/spline-tool/wi
 
 Online Demo : http://2youyou2.com/spline-tool-examples/
 
+Example Video : 
+ - https://www.youtube.com/watch?v=zrt5tc9d0C0&feature=youtu.be 
+ - https://www.bilibili.com/video/BV1sf4y117kV/
+
 # How to use it
 
 Simply copy or clone this repo into your project/assets folder. 
