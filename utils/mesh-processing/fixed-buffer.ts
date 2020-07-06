@@ -4,13 +4,14 @@ export const builtinAttributes = {
     position: { name: GFXAttributeName.ATTR_POSITION, format: GFXFormat.RGB32F },
     normal: { name: GFXAttributeName.ATTR_NORMAL, format: GFXFormat.RGB32F },
     uv: { name: GFXAttributeName.ATTR_TEX_COORD, format: GFXFormat.RG32F },
+    uv1: { name: GFXAttributeName.ATTR_TEX_COORD1, format: GFXFormat.RG32F },
     color: { name: GFXAttributeName.ATTR_COLOR, format: GFXFormat.RGBA32F },
     tangent: { name: GFXAttributeName.ATTR_TANGENT, format: GFXFormat.RGBA32F },
 }
-export type AttributesKey = 'position' | 'normal' | 'uv' | 'tangent' | 'color';
+export type AttributesKey = 'position' | 'normal' | 'uv' | 'uv1' | 'tangent' | 'color';
 
 export default class FixedBuffer {
-    static create (verticesCount, indicesCount, attributes: AttributesKey[] = ['position', 'normal', 'tangent', 'uv'], { arrayBuffer, arrayBufferVerticesOffset = 0, arrayBufferIndicesOffset = 0}) {
+    static create (verticesCount, indicesCount, attributes: AttributesKey[] = ['position', 'normal', 'tangent', 'uv', 'uv1'], { arrayBuffer, arrayBufferVerticesOffset = 0, arrayBufferIndicesOffset = 0}) {
 
         let attrs: any = {};
 

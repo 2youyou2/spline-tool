@@ -4,7 +4,7 @@ import { Mesh, GFXFormatInfos, GFXPrimitiveMode, IGFXAttribute, utils, ModelComp
 const MAX_VERTICES_COUNT = 65535;
 
 export default class FixedModelMesh {
-    static create (verticesCount: number, indicesCount: number, modelComp: ModelComponent, modelCount: number, attributes: AttributesKey[] = ['position', 'normal', 'tangent', 'uv']) {
+    static create (verticesCount: number, indicesCount: number, modelComp: ModelComponent, modelCount: number, attributes: AttributesKey[] = ['position', 'normal', 'tangent', 'uv', 'uv1']) {
         let fixedModelMesh = new FixedModelMesh();
         
         let gfxAttrs: IGFXAttribute[] = [];

@@ -89,6 +89,7 @@ export default class ScatterItem {
                 this._meshStructs[i] = this._fixedMeshes[i].mesh.struct;
                 model.mesh = this._fixedMeshes[i].mesh;
                 model.shadowCastingMode = tempModel.shadowCastingMode;
+                model.lightmapSettings = tempModel.lightmapSettings;
 
                 let renderingSubMeshes = model.mesh.renderingSubMeshes;
                 let material = tempMaterials[i] || tempMaterials[0];
@@ -194,6 +195,7 @@ export default class ScatterItem {
                 fixedMesh.writeVertex(offset, 'normal', Vec3.toArray(tempArray3, Vec3.transformMat4(tempMeshNormal, vert.position, mat)));
                 fixedMesh.writeVertex(offset, 'tangent', Vec4.toArray(tempArray4, Vec4.transformMat4(tempMeshTangent, vert.tangent, mat)));
                 fixedMesh.writeVertex(offset, 'uv', Vec2.toArray(tempArray2, vert.uv));
+                fixedMesh.writeVertex(offset, 'uv1', Vec2.toArray(tempArray2, vert.uv1));
             }
 
             let triangles = sourceMesh.triangles;

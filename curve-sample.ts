@@ -151,7 +151,7 @@ export default class CurveSample {
 
     public getBent (vert: MeshVertex, out?: MeshVertex): MeshVertex {
         if (!out) {
-            out = MeshVertex.create(vert.position, vert.normal, vert.uv, vert.tangent);
+            out = MeshVertex.create(vert);
         }
         else if (out !== vert) {
             out.set(vert);
