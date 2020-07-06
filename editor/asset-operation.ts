@@ -3,7 +3,7 @@ import { Mesh } from "cc";
 let _createMesh: (filePath: string) => Promise<Mesh>;
 let _saveMesh: (filePath: string, mesh: Mesh) => Promise<Mesh>;
 
-if (CC_EDITOR) {
+if (CC_EDITOR && typeof BUILDER === 'undefined') {
 
     const { createReadStream, createWriteStream, ensureDirSync, existsSync, readdirSync, removeSync, writeFileSync } = window.require('fs-extra');
     const { dirname, join, parse } = window.require('path');
