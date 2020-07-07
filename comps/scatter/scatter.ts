@@ -208,7 +208,7 @@ export default class Scatter extends SplineUtilRenderer {
 
     public onLoad () {
         if (!this._cacheToMesh || !this._virtualMesh) {
-            this._updateVolume();
+            // this._updateVolume();
         }
         else {
             this._initWidthVirtualMesh();    
