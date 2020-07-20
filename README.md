@@ -1,7 +1,7 @@
 
 # Spline Tool
 
-![image](https://user-images.githubusercontent.com/1862402/85509193-1d9d0c00-b628-11ea-8f1b-c87344456a89.png)
+![image](https://user-images.githubusercontent.com/1862402/87893081-63a38f00-ca71-11ea-9acb-a1c5287eecfd.png)
 
 Spline Tool is a **Cocos Creator 3D (based on v1.1.1) Plugin** that allows you to create curved content.
  - Generalistic spline component
