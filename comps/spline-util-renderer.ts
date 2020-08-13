@@ -34,6 +34,7 @@ export default class SplineUtilRenderer extends SplineUtilBase {
                 }
                 else {
                     this._generated = new PrivateNode(generatedName);
+                    this._generated._objFlags |= cc.Object.Flags.DontSave;
                 }
                 this._generated.parent = this.node;
             }
