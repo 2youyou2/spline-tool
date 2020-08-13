@@ -4,9 +4,10 @@ import MeshBender, { FillingMode, AlignType, ValueType } from '../utils/mesh-pro
 import SourceMesh from '../utils/mesh-processing/source-mesh';
 import Spline from '../spline';
 import UAnimationCurve from '../utils/animation-curve';
-import { _decorator, Node, Vec3, Mesh, Quat, ModelComponent, Material, geometry, CurveRange, Vec2 } from 'cc';
+import { _decorator, Node, Vec3, Mesh, Quat, ModelComponent, Material, geometry, CurveRange, Vec2, MeshColliderComponent, RigidBodyComponent } from 'cc';
 import CubicBezierCurve from '../cubic-bezier-curve';
 import ISplineCruve from '../spline-curve-interface';
+import Event from '../utils/event';
 const { ccclass, executeInEditMode, float, type, boolean, property } = _decorator;
 
 let tempPos = new Vec3();
@@ -189,6 +190,7 @@ export default class SplineMeshTiling extends SplineUtilRenderer {
         this.dirty = true;
     }
 
+    onGenerateEvent: Event = new Event;
 
     public compute () {
         if (!this.mesh) {
@@ -202,9 +204,9 @@ export default class SplineMeshTiling extends SplineUtilRenderer {
             if (this.curveSpace) {
                 let curves = this.spline.curves;
                 for (let i = 0; i < curves.length; i++) {
-                    this._getOrcreate(used++, curves[i]);
+                    this._getOrcreate(used++, curves[ i ]);
                     if (this.mirror) {
-                        this._getOrcreate(used++, curves[i], true);
+                        this._getOrcreate(used++, curves[ i ], true);
                     }
                 }
             } else {
@@ -224,7 +226,7 @@ export default class SplineMeshTiling extends SplineUtilRenderer {
 
         if (children.length > used) {
             for (let i = children.length - 1; i >= used; i--) {
-                children[i].parent = null;
+                children[ i ].parent = null;
             }
         }
     }
@@ -232,7 +234,7 @@ export default class SplineMeshTiling extends SplineUtilRenderer {
     private _updateMaterials () {
         let children = this.generated.children;
         for (let i = 0; i < children.length; i++) {
-            let mc = children[i].getComponent(ModelComponent);
+            let mc = children[ i ].getComponent(ModelComponent);
             mc.material = this.material;
         }
     }
@@ -240,13 +242,13 @@ export default class SplineMeshTiling extends SplineUtilRenderer {
     private _updateMode () {
         let children = this.generated.children;
         for (let i = 0; i < children.length; i++) {
-            let mb = children[i].getComponent(MeshBender);
+            let mb = children[ i ].getComponent(MeshBender);
             mb.mode = this.mode;
         }
     }
 
     private _getOrcreate (childIdx, target: ISplineCruve, mirror = false) {
-        let node: Node = this.generated.children[childIdx];
+        let node: Node = this.generated.children[ childIdx ];
         if (!node) {
             node = new Node();
             node.parent = this.generated;
@@ -289,6 +291,8 @@ export default class SplineMeshTiling extends SplineUtilRenderer {
             mc = node.addComponent(ModelComponent);
             mc.material = this.material;
         }
+
+        this.onGenerateEvent.invoke(node)
 
         return node;
     }

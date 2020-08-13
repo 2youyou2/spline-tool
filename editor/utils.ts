@@ -1,4 +1,4 @@
-import { Node, Mat4, Vec3, Color, ModelComponent } from 'cc';
+import { Node, Mat4, Vec3, Color, ModelComponent, Component } from 'cc';
 import MeshUtility from '../utils/mesh-processing/mesh-utility';
 
 let tempMat4 = new Mat4;
@@ -94,4 +94,14 @@ export function node2nodeLength (node1: Node, node2: Node, length: number) {
     tempVec3.set(length, 0, 0);
     node2nodePos(node1, node2, tempVec3, tempVec3, true);
     return tempVec3.length();
+}
+
+export function findComponentInParent<T extends Component> (node: Node, ctor: typeof T) {
+    let parent: Node = node;
+    while (parent) {
+        let comp = parent.getComponent(ctor);
+        if (comp) return comp;
+        parent = parent.parent;
+    }
+    return null;
 }

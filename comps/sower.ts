@@ -1,5 +1,6 @@
 import { _decorator, Node, Prefab, isPropertyModifier, Vec4, Quat, Vec3 } from 'cc';
 import SplineUtilRenderer from './spline-util-renderer';
+import Event from '../utils/event';
 
 const { ccclass, executeInEditMode, float, type, boolean, property } = _decorator;
 
@@ -7,7 +8,7 @@ let tempQuat = new Quat();
 
 @ccclass
 @executeInEditMode
-export default class NewClass extends SplineUtilRenderer {
+export default class Sower extends SplineUtilRenderer {
     @float
     _spacing = 10;
     @float
@@ -57,6 +58,8 @@ export default class NewClass extends SplineUtilRenderer {
         this.dirty = true;
     };
 
+    onComputedEvent: Event = new Event;
+
     public compute () {
         let children = this.generated.children;
 
@@ -103,5 +106,7 @@ export default class NewClass extends SplineUtilRenderer {
                 children[i].parent = null;
             }
         }
+
+        this.onComputedEvent.invoke();
     }
 }

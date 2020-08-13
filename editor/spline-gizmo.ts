@@ -1,5 +1,5 @@
 import Gizmo from './base/gizmo';
-import { getNodeLocalPostion, getNodeWorldPostion } from './utils';
+import { getNodeLocalPostion, getNodeWorldPostion, findComponentInParent } from './utils';
 
 import SplineNodeController from './spline-node-controller';
 import ContinuousLineController from './continuous-line-controller';
@@ -10,17 +10,6 @@ import { Component, AnimationComponent, Node, Vec3 } from 'cc';
 import { SplineMoveType } from './types';
 
 if (CC_EDITOR) {
-
-    function findComponentInParent<T extends Component> (node: Node, ctor: typeof T) {
-        let parent: Node = node;
-        while (parent) {
-            let comp = parent.getComponent(ctor);
-            if (comp) return comp;
-            parent = parent.parent;
-        }
-        return null;
-    }
-
 
     let tempVec3 = new Vec3
 
