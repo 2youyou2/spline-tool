@@ -6,6 +6,8 @@ const { ccclass, executeInEditMode, float, type, boolean, property } = _decorato
 
 let tempQuat = new Quat();
 
+let tempBinormal = new Vec3
+
 @ccclass
 @executeInEditMode
 export default class Sower extends SplineUtilRenderer {
@@ -90,7 +92,7 @@ export default class Sower extends SplineUtilRenderer {
             node.setRotation(tempQuat);
             
             // move orthogonaly to the spline, according to offset + random
-            let binormal = Vec3.transformQuat(cc.v3(), cc.Vec3.RIGHT, Quat.fromViewUp(cc.quat(), sample.tangent, sample.up)).normalize();
+            let binormal = Vec3.transformQuat(tempBinormal, cc.Vec3.RIGHT, Quat.fromViewUp(tempQuat, sample.tangent, sample.up)).normalize();
             let localOffset = this.offset + Math.random() * this.offsetRange * Math.sign(this.offset);
             localOffset *= sample.scale.x;
             binormal.multiplyScalar(localOffset);
