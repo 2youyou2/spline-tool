@@ -8,10 +8,12 @@ import SplineNode from '../spline-node';
 import Spline from '../spline';
 import { Component, AnimationComponent, Node, Vec3 } from 'cc';
 import { SplineMoveType } from './types';
+import { SplineGridUtil } from './comps/spline-grid-util';
 
 if (CC_EDITOR) {
 
     let tempVec3 = new Vec3
+    let tempVec3_2 = new Vec3
 
     class SplineGizmo extends Gizmo {
         moveTarget = null;
@@ -280,6 +282,27 @@ if (CC_EDITOR) {
                 }
             };
             controller.onControllerMouseUp = () => {
+                if (this.moveType !== SplineMoveType.Node) {
+                    let splineNode = this.moveTarget;
+                    let gridUtil = this.spline.getComponent(SplineGridUtil);
+                    if (gridUtil) {
+                        tempVec3.set(
+                            splineNode.position.x - splineNode.position.x % gridUtil.splineNodeGrid.x,
+                            splineNode.position.y - splineNode.position.y % gridUtil.splineNodeGrid.y,
+                            splineNode.position.z - splineNode.position.z % gridUtil.splineNodeGrid.z,
+                        );
+                        Vec3.subtract(tempVec3_2, tempVec3, splineNode.position);
+                        splineNode.position = tempVec3
+
+                        splineNode.direction = tempVec3_2.add(splineNode.direction)
+
+                        this.updateControllerTransform();
+                        this.updateMoveControllderPos();
+                    }
+
+                    this.onComponentChanged(this.spline.node);
+                }
+
                 this.spline.gizmoEditing = false;
 
                 if (controller.updated) {
