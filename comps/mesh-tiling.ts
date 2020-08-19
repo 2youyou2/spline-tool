@@ -292,6 +292,8 @@ export default class SplineMeshTiling extends SplineUtilRenderer {
             mc.material = this.material;
         }
 
+        mb.update();
+
         this.onGenerateEvent.invoke(node)
 
         return node;
