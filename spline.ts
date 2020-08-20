@@ -224,7 +224,7 @@ export default class Spline extends Component {
                     this.addNode(node.position, node.direction, node.up, node.scale, node.roll);
                 }
             }
-            else {
+            else if (autoCreate) {
                 this.addNode(cc.v3(-5, 0, 0), cc.v3(-5, 0, -3));
                 this.addNode(cc.v3(5, 0, 0), cc.v3(5, 0, 3));
             }
