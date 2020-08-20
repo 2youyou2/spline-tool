@@ -205,9 +205,10 @@ export default class Spline extends Component {
         return splineNode;
     }
 
+
     _nodeRoot: Node;
     _updatingNodes = false;
-    private _updateNodes () {
+    _updateNodes (autoCreate = true) {
         this._updatingNodes = true;
 
         let nodeRoot = this._nodeRoot = find(SplineRootNodeName, this.node);
