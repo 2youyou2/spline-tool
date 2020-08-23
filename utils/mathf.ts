@@ -94,3 +94,9 @@ export function pointPolygonMinDistXZ (point: Vec3, polygon: Vec3[]) {
     }
     return _pointPolygonMinDistXZRes;
 }
+
+
+export function pointInBoundingXZ (point: Vec3, min: Vec3, max: Vec3, expandX=0, expandZ=0) {
+    return point.x >= (min.x-expandX) && point.x <= (max.x+expandX) &&
+        point.z >= (min.z-expandZ) && point.z <= (max.z+expandZ);
+}
