@@ -381,7 +381,7 @@ export default class MeshBender extends Component {
                         let distOnSpline = this.intervalStart + distance;
                         //if (true) { //spline.isLoop) {
                         while (distOnSpline > this.spline.length) {
-                            distOnSpline -= this.spline.length;
+                            distOnSpline = this.spline.length;
                         }
                         //} else if (distOnSpline > spline.Length) {
                         //    continue;
@@ -413,7 +413,7 @@ export default class MeshBender extends Component {
                     let distOnSpline = this.intervalStart + distance;
                     //if (true) { //spline.isLoop) {
                     while (distOnSpline > this.spline.length) {
-                        distOnSpline -= this.spline.length;
+                        distOnSpline = this.spline.length;
                     }
                     //} else if (distOnSpline > spline.Length) {
                     //    continue;
