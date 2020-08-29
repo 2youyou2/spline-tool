@@ -101,7 +101,9 @@ export default {
             ]
         }
 
-        return cc.utils.createMesh(primitive);
+        return cc.utils.createMesh(primitive, null, {
+            calculateBounds: true
+        });
     },
 
     updateMesh (modelComp: ModelComponent, primitive: any) {
