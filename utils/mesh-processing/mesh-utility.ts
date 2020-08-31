@@ -13,14 +13,27 @@ const primitiveAttr = {
         size: 2,
         gfxName: GFXAttributeName.ATTR_TEX_COORD
     },
+    colors: {
+        size: 4,
+        gfxName: GFXAttributeName.ATTR_COLOR
+    },
+
+
+    // custom
     tangents: {
         size: 4,
         gfxName: GFXAttributeName.ATTR_TANGENT
-    }
+    },
+    uvs1: {
+        size: 2,
+        gfxName: GFXAttributeName.ATTR_TEX_COORD1
+    },
 }
 
 const customAttributes = {
-    tagent: { name: GFXAttributeName.ATTR_TANGENT, format: GFXFormat.RGBA32F }
+    tangents: { name: GFXAttributeName.ATTR_TANGENT, format: GFXFormat.RGBA32F },
+    uvs1: { name: GFXAttributeName.ATTR_TEX_COORD1, format: GFXFormat.RG32F },
+
 }
 
 function flat (arr: any) {
@@ -92,13 +105,17 @@ export default {
             }
         }
 
-        if (primitive.tangents) {
-            primitive.customAttributes = [
-                { 
-                    attr:  customAttributes.tagent,
-                    values: primitive.tangents
-                }
-            ]
+        primitive.customAttributes = [];
+        for (let name in customAttributes) {
+            if (primitive[name]) {
+                primitive[name] = flat(primitive[name]);
+                primitive.customAttributes.push(
+                    {
+                        attr: customAttributes[name],
+                        values: primitive[name]
+                    }
+                )
+            }
         }
 
         return cc.utils.createMesh(primitive, null, {
@@ -176,8 +193,8 @@ export default {
         model.updateCommandBuffer();
     },
 
-    updateOrCreateModelMesh (model: ModelComponent, primitive) {
-        if (!model.mesh) {
+    updateOrCreateModelMesh (model: ModelComponent, primitive, forceCreate = false) {
+        if (!model.mesh || forceCreate) {
             model.mesh = this.createMesh(primitive);
         }
         else {

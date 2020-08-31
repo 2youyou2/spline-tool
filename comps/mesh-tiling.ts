@@ -4,7 +4,7 @@ import MeshBender, { FillingMode, AlignType, ValueType } from '../utils/mesh-pro
 import SourceMesh from '../utils/mesh-processing/source-mesh';
 import Spline from '../spline';
 import UAnimationCurve from '../utils/animation-curve';
-import { _decorator, Node, Vec3, Mesh, Quat, ModelComponent, Material, geometry, CurveRange, Vec2, MeshColliderComponent, RigidBodyComponent } from 'cc';
+import { _decorator, Node, Vec3, Mesh, Quat, ModelComponent, Material, geometry, CurveRange, Vec2, MeshColliderComponent, RigidBodyComponent, Color } from 'cc';
 import CubicBezierCurve from '../cubic-bezier-curve';
 import ISplineCruve from '../spline-curve-interface';
 import Event from '../utils/event';
@@ -190,6 +190,30 @@ export default class SplineMeshTiling extends SplineUtilRenderer {
         this.dirty = true;
     }
 
+    @property
+    private _useCustomVertexColor = false;
+    @property
+    get useCustomVertexColor () {
+        return this._useCustomVertexColor;
+    }
+    set useCustomVertexColor (v) {
+        this._useCustomVertexColor = v;
+        this.dirty = true;
+    }
+
+    @property
+    private _customVertexColor = new Color;
+    @property
+    get customVertexColor () {
+        return this._customVertexColor;
+    }
+    set customVertexColor (v) {
+        this._customVertexColor.set(v);
+        if (this._useCustomVertexColor) {
+            this.dirty = true;
+        }
+    }
+
     onGenerateEvent: Event = new Event;
 
     public compute () {
@@ -285,6 +309,8 @@ export default class SplineMeshTiling extends SplineUtilRenderer {
         mb.heightRange = this.heightRange;
         mb.alignType = this.alignType;
         mb.alignOffset = this.alignOffset;
+        mb.customVertexColor = this.customVertexColor;
+        mb.useCustomVertexColor = this.useCustomVertexColor;
 
         let mc = node.getComponent(ModelComponent);
         if (!mc) {

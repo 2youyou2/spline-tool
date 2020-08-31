@@ -1,8 +1,8 @@
-import { Component, Mesh, GFXAttributeName, Vec2, ModelComponent, _decorator, Enum, Vec3, CurveRange, repeat, clamp } from 'cc';
+import { Component, Mesh, GFXAttributeName, Vec2, ModelComponent, _decorator, Enum, Vec3, CurveRange, repeat, clamp, Color } from 'cc';
 import Spline from '../../spline';
 import CubicBezierCurve from '../../cubic-bezier-curve';
 import CurveSample from '../../curve-sample';
-import MeshVertex from './mesh-vertex';
+import MeshVertex, { MeshVertexFlags } from './mesh-vertex';
 import SourceMesh from './source-mesh';
 import MeshUtility from './mesh-utility';
 
@@ -80,13 +80,33 @@ function _applyVert (meshBender: MeshBender, vert: MeshVertex, sample: CurveSamp
 }
 
 function _endFill (meshBender: MeshBender, bentVertices: MeshVertex[], sampleCache: Map<string, CurveSample>, triangles?: number[]) {
+    let vertexFlags = bentVertices[0].flag;
+
+    let colors;
+    if (meshBender.useCustomVertexColor) {
+        vertexFlags |= MeshVertexFlags.Color;
+
+        colors = [];
+        for (let i = 0; i < bentVertices.length; i++) {
+            colors.push(meshBender.customVertexColor);
+        }
+    }
+    else {
+        colors = (vertexFlags & MeshVertexFlags.Color) && bentVertices.map(b => b.color);
+    }
+
+    let forceRecreate = vertexFlags !== meshBender._vertexFlags;
+    meshBender._vertexFlags = vertexFlags;
+
     MeshUtility.updateOrCreateModelMesh(meshBender.getComponent(ModelComponent), {
-        positions: bentVertices.map(b => b.position),
-        normals: bentVertices.map(b => b.normal),
-        tangents: bentVertices.map(b => b.tangent),
-        uvs: bentVertices.map(b => b.uv),
+        positions: (vertexFlags & MeshVertexFlags.Position) && bentVertices.map(b => b.position),
+        normals: (vertexFlags & MeshVertexFlags.Normal) && bentVertices.map(b => b.normal),
+        tangents: (vertexFlags & MeshVertexFlags.Tangent) && bentVertices.map(b => b.tangent),
+        uvs: (vertexFlags & MeshVertexFlags.UV) && bentVertices.map(b => b.uv),
+        uv1s: (vertexFlags & MeshVertexFlags.UV1) && bentVertices.map(b => b.uv1),
+        colors,
         indices: triangles || meshBender.source.triangles
-    });
+    }, forceRecreate);
 
     for (let i = 0; i < bentVertices.length; i++) {
         MeshVertex.pool.put(bentVertices[i]);
@@ -109,6 +129,8 @@ export default class MeshBender extends Component {
     private curve: CubicBezierCurve;
     private _sampleCache: Map<string, CurveSample> = new Map();
 
+    _vertexFlags = 0;
+
     private _source: SourceMesh;
     /// <summary>
     /// The source mesh to bend.
@@ -129,6 +151,24 @@ export default class MeshBender extends Component {
         if (value == this._mode) return;
         this.dirty = true;
         this._mode = value;
+    }
+
+    private _useCustomVertexColor = false;
+    get useCustomVertexColor () {
+        return this._useCustomVertexColor;
+    }
+    set useCustomVertexColor (v) {
+        this._useCustomVertexColor = v;
+        this.dirty = true;
+    }
+
+    private _customVertexColor = new Color;
+    get customVertexColor () {
+        return this._customVertexColor;
+    }
+    set customVertexColor (v) {
+        this._customVertexColor.set(v);
+        this.dirty = true;
     }
 
     _offset = 0;

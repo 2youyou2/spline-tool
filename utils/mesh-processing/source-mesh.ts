@@ -1,5 +1,5 @@
 import { Mesh, Vec3, Quat, GFXAttributeName, Vec4, Vec2 } from 'cc';
-import MeshVertex from './mesh-vertex';
+import MeshVertex, { MeshVertexFlags } from './mesh-vertex';
 import MeshUtility from './mesh-utility';
 import MeshTesselate from './mesh-tesselate';
 
@@ -166,9 +166,13 @@ export default class SourceMesh {
             let uv1s = this._mesh.readAttribute(si, GFXAttributeName.ATTR_TEX_COORD1);
             let hasUv1s = uv1s && uv1s.length > 0;
 
+            let colors = this._mesh.readAttribute(si, GFXAttributeName.ATTR_COLOR);
+            let hasColors = uv1s && uv1s.length > 0;
+
             let vertCount = positions.length / 3;
             let i = 0;
             for (; i < vertCount; i++) {
+                let flag = MeshVertexFlags.Position | MeshVertexFlags.Normal;
                 let transformed = vertices[i];
                 if (!transformed) {
                     transformed = vertices[i] = MeshVertex.pool.get();
@@ -177,14 +181,21 @@ export default class SourceMesh {
                 transformed.normal.set(normals[3 * i + 0], normals[3 * i + 1], normals[3 * i + 2]);
                 if (hasUvs) {
                     transformed.uv.set(uvs[2 * i + 0], uvs[2 * i + 1]);
+                    flag |= MeshVertexFlags.UV;
                 }
                 if (hasUv1s) {
                     transformed.uv1.set(uv1s[2 * i + 0], uv1s[2 * i + 1]);
+                    flag |= MeshVertexFlags.UV1;
                 }
                 if (hasTangents) {
                     transformed.tangent.set(tangents[4 * i + 0], tangents[4 * i + 1], tangents[4 * i + 2], tangents[4 * i + 3]);
+                    flag |= MeshVertexFlags.Tangent;
                 }
-                //  application of rotation
+                if (hasColors) {
+                    transformed.color.set(colors[4 * i + 0], colors[4 * i + 1], colors[4 * i + 2], colors[4 * i + 3]);
+                    flag |= MeshVertexFlags.Color;
+                }
+                //  apply rotation
                 if (!this.rotation.equals(Quat.IDENTITY)) {
                     Vec3.transformQuat(transformed.position, transformed.position, this.rotation);
                     Vec3.transformQuat(transformed.normal, transformed.normal, this.rotation);
@@ -198,7 +209,8 @@ export default class SourceMesh {
                     // Vec4.multiply(transformed.tangent, transformed.tangent, this.scale);
                 }
                 transformed.position.add(this.translation);
-
+                
+                transformed.flag = flag;
             }
 
             for (; i < vertices.length; i++) {
