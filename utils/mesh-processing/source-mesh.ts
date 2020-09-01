@@ -29,6 +29,18 @@ export default class SourceMesh {
         return this._triangles[0];
     }
 
+    private _minZ: number[] = [0];
+    get minZ () {
+        if (!this._vertices[0]) this.buildData();
+        return this._minZ[0];
+    }
+
+    private _lengthZ: number[] = [0];
+    get lengthZ () {
+        if (!this._vertices[0]) this.buildData();
+        return this._lengthZ[0];
+    }
+
     private _minX: number[] = [0];
     get minX () {
         if (!this._vertices[0]) this.buildData();
@@ -225,6 +237,8 @@ export default class SourceMesh {
             let maxX = -Number.MAX_SAFE_INTEGER;
             this._minY[si] = Number.MAX_SAFE_INTEGER;
             let maxY = -Number.MAX_SAFE_INTEGER;
+            this._minZ[si] = Number.MAX_SAFE_INTEGER;
+            let maxZ = -Number.MAX_SAFE_INTEGER;
             for (let i = 0; i < vertices.length; i++) {
                 let vert = vertices[i];
                 let p = vert.position;
@@ -232,9 +246,12 @@ export default class SourceMesh {
                 this._minX[si] = Math.min(this._minX[si], p.x);
                 maxY = Math.max(maxY, p.y);
                 this._minY[si] = Math.min(this._minY[si], p.y);
+                maxZ = Math.max(maxZ, p.z);
+                this._minZ[si] = Math.min(this._minZ[si], p.z);
             }
             this._lengthX[si] = Math.abs(maxX - this._minX[si]);
             this._lengthY[si] = Math.abs(maxY - this._minY[si]);
+            this._lengthZ[si] = Math.abs(maxZ - this._minZ[si]);
         }
     }
 

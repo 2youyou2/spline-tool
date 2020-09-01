@@ -36,11 +36,18 @@ Enum(FillingMode)
 export enum AlignType {
     None,
     Top,
-    bottom,
-    // Right,
-    // Left
+    Bottom,
+    Right,
+    Left
 }
 Enum(AlignType)
+
+export enum MirrorType {
+    None,
+    Z,
+    Y
+}
+Enum(MirrorType)
 
 export enum ValueType {
     Absolute,
@@ -49,32 +56,66 @@ export enum ValueType {
 Enum(ValueType)
 
 // fill helpfer
+let _tempWidthRange = new Vec2();
 let _tempHeightRange = new Vec2();
+let _tempZOffset = 0;
 let _tempYOffset = 0;
+let _alignZOffset = 0;
+let _alignYOffset = 0;
 function _beginFill (meshBender: MeshBender) {
     let source = meshBender.source;
+    _tempZOffset = 0;
     _tempYOffset = 0;
+    _alignZOffset = 0;
+    _alignYOffset = 0;
     switch (meshBender.alignType) {
         case AlignType.None:
             break;
         case AlignType.Top:
-            _tempYOffset = meshBender.alignOffset - (source.minY + source.lengthY);
+            _alignYOffset = meshBender.alignOffset;
+            _tempYOffset = - (source.minY + source.lengthY);
             break;
-        case AlignType.bottom:
-            _tempYOffset = meshBender.alignOffset - source.minY;
+        case AlignType.Bottom:
+            _alignYOffset = meshBender.alignOffset;
+            _tempYOffset = - source.minY;
+            break;
+        case AlignType.Right:
+            _alignZOffset = meshBender.alignOffset;
+            _tempZOffset = - (source.minZ + source.lengthZ);
+            break;
+        case AlignType.Left:
+            _alignZOffset = meshBender.alignOffset;
+            _tempZOffset = - source.minZ;
             break;
     }
 
+    _tempWidthRange.set(source.minZ + meshBender.widthRange.x * source.lengthZ, source.minZ + meshBender.widthRange.y * source.lengthZ);
     _tempHeightRange.set(source.minY + meshBender.heightRange.x * source.lengthY, source.minY + meshBender.heightRange.y * source.lengthY);
 }
 
 function _applyVert (meshBender: MeshBender, vert: MeshVertex, sample: CurveSample, distanceRatio) {
     vert = MeshVertex.pool.get().set(vert);
+    vert.position.z = clamp(vert.position.z, _tempWidthRange.x, _tempWidthRange.y);
     vert.position.y = clamp(vert.position.y, _tempHeightRange.x, _tempHeightRange.y);
+
+    vert.position.z += _tempZOffset;
     vert.position.y += _tempYOffset;
+    if (meshBender.widthCurve) {
+        vert.position.z *= meshBender.widthCurve.evaluate(distanceRatio, 0.5);
+    }
     if (meshBender.heightCurve) {
         vert.position.y *= meshBender.heightCurve.evaluate(distanceRatio, 0.5);
     }
+    vert.position.z += _alignZOffset;
+    vert.position.y += _alignYOffset;
+
+    // if (meshBender.mirror === MirrorType.Y) {
+    //     vert.position.y *= -1;
+    // }
+    // else if (meshBender.mirror === MirrorType.Z) {
+    //     vert.position.z *= -1;
+    // }
+
     vert = sample.getBent(vert, vert);
     return vert;
 }
@@ -153,6 +194,14 @@ export default class MeshBender extends Component {
         this._mode = value;
     }
 
+    private _mirror = MirrorType.None;
+    get mirror () { return this._mirror; }
+    set mirror (value) {
+        if (value == this._mirror) return;
+        this.dirty = true;
+        this._mirror = value;
+    }
+
     private _useCustomVertexColor = false;
     get useCustomVertexColor () {
         return this._useCustomVertexColor;
@@ -205,6 +254,25 @@ export default class MeshBender extends Component {
             return this.offset * this.length;
         }
 
+    }
+
+
+    _widthCurve: CurveRange = null;
+    get widthCurve () {
+        return this._widthCurve;
+    }
+    set widthCurve (value) {
+        this._widthCurve = value;
+        this.dirty = true;
+    }
+
+    _widthRange = new Vec2(0, 1)
+    get widthRange () {
+        return this._widthRange;
+    }
+    set widthRange (value) {
+        this._widthRange.set(value);
+        this.dirty = true;
     }
 
     _heightCurve: CurveRange = null;
@@ -471,7 +539,7 @@ export default class MeshBender extends Component {
     }
 
     private fillStretch () {
-        
+
         let bentVertices: MeshVertex[] = [];
         let source = this.source;
         let sampleCache = this._sampleCache;

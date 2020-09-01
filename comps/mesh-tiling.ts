@@ -1,6 +1,6 @@
 
 import SplineUtilRenderer from './spline-util-renderer';
-import MeshBender, { FillingMode, AlignType, ValueType } from '../utils/mesh-processing/mesh-bender';
+import MeshBender, { FillingMode, AlignType, ValueType, MirrorType } from '../utils/mesh-processing/mesh-bender';
 import SourceMesh from '../utils/mesh-processing/source-mesh';
 import Spline from '../spline';
 import UAnimationCurve from '../utils/animation-curve';
@@ -132,6 +132,28 @@ export default class SplineMeshTiling extends SplineUtilRenderer {
         this._offsetValueType = value;
         this.onCurveChanged();
     }
+    
+    @type(CurveRange)
+    _widthCurve: CurveRange = UAnimationCurve.one();
+    @type(CurveRange)
+    get widthCurve () {
+        return this._widthCurve;
+    }
+    set widthCurve (value) {
+        this._widthCurve = value;
+        this.dirty = true;
+    }
+
+    @type(Vec2)
+    _widthRange = new Vec2(0, 1)
+    @type(Vec2)
+    get widthRange () {
+        return this._widthRange;
+    }
+    set widthRange (value) {
+        this._widthRange = value;
+        this.dirty = true;
+    }
 
     @type(CurveRange)
     _heightCurve: CurveRange = UAnimationCurve.one();
@@ -179,14 +201,14 @@ export default class SplineMeshTiling extends SplineUtilRenderer {
         this.dirty = true;
     }
 
-    @property
-    _mirror = false;
-    @property
+    @type(MirrorType)
+    _mirrorType = MirrorType.None;
+    @type(MirrorType)
     get mirror () {
-        return this._mirror;
+        return this._mirrorType;
     }
     set mirror (value) {
-        this._mirror = value;
+        this._mirrorType = value;
         this.dirty = true;
     }
 
@@ -229,21 +251,21 @@ export default class SplineMeshTiling extends SplineUtilRenderer {
                 let curves = this.spline.curves;
                 for (let i = 0; i < curves.length; i++) {
                     this._getOrcreate(used++, curves[ i ]);
-                    if (this.mirror) {
-                        this._getOrcreate(used++, curves[ i ], true);
+                    if (this.mirror !== MirrorType.None) {
+                        this._getOrcreate(used++, curves[ i ], this.mirror);
                     }
                 }
             } else {
                 this._getOrcreate(used++, this.spline);
-                if (this.mirror) {
-                    this._getOrcreate(used++, this.spline, true);
+                if (this.mirror !== MirrorType.None) {
+                    this._getOrcreate(used++, this.spline, this.mirror);
                 }
             }
         }
         else {
             this._getOrcreate(used++, this.splineCurve);
-            if (this.mirror) {
-                this._getOrcreate(used++, this.splineCurve, true);
+            if (this.mirror !== MirrorType.None) {
+                this._getOrcreate(used++, this.splineCurve, this.mirror);
             }
         }
 
@@ -271,7 +293,7 @@ export default class SplineMeshTiling extends SplineUtilRenderer {
         }
     }
 
-    private _getOrcreate (childIdx, target: ISplineCruve, mirror = false) {
+    private _getOrcreate (childIdx, target: ISplineCruve, mirror = MirrorType.None) {
         let node: Node = this.generated.children[ childIdx ];
         if (!node) {
             node = new Node();
@@ -290,13 +312,7 @@ export default class SplineMeshTiling extends SplineUtilRenderer {
 
         let translation = this.translation;
         let rotation = this.rotation;
-        if (mirror) {
-            translation = tempPos.set(this.translation);
-            translation.multiplyScalar(-1);
-
-            rotation = tempRotation.set(this.rotation);
-            rotation.multiplyScalar(-1);
-        }
+        let alignOffset = this.alignOffset;
 
         mb.source = SourceMesh.build(this.mesh)
             .translate(translation)
@@ -305,12 +321,34 @@ export default class SplineMeshTiling extends SplineUtilRenderer {
         mb.mode = this.mode;
         mb.offset = this.offset;
         mb.offsetValueType = this.offsetValueType;
+        mb.widthCurve = this.widthCurve;
+        mb.widthRange = this.widthRange;
         mb.heightCurve = this.heightCurve;
         mb.heightRange = this.heightRange;
         mb.alignType = this.alignType;
-        mb.alignOffset = this.alignOffset;
+        mb.alignOffset = alignOffset;
         mb.customVertexColor = this.customVertexColor;
         mb.useCustomVertexColor = this.useCustomVertexColor;
+        mb.mirror = mirror;
+
+        if (mirror === MirrorType.Z) {
+            mb.alignOffset *= -1;
+            if (mb.alignType === AlignType.Left) {
+                mb.alignType = AlignType.Right;
+            }
+            else if (mb.alignType === AlignType.Right) {
+                mb.alignType = AlignType.Left;
+            }
+        }
+        else if (mirror === MirrorType.Y) {
+            mb.alignOffset *= -1;
+            if (mb.alignType === AlignType.Top) {
+                mb.alignType = AlignType.Bottom;
+            }
+            else if (mb.alignType === AlignType.Bottom) {
+                mb.alignType = AlignType.Top;
+            }
+        }
 
         let mc = node.getComponent(ModelComponent);
         if (!mc) {
