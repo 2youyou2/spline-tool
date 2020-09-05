@@ -1,6 +1,7 @@
 import { _decorator, Node, Prefab, isPropertyModifier, Vec4, Quat, Vec3 } from 'cc';
 import SplineUtilRenderer from './spline-util-renderer';
 import Event from '../utils/event';
+import pool from '../utils/pool';
 
 const { ccclass, executeInEditMode, float, type, boolean, property } = _decorator;
 
@@ -27,6 +28,10 @@ export default class Sower extends SplineUtilRenderer {
     _rotation = new Vec3();
     @type(Prefab)
     _prefab: Prefab = null;
+    @property
+    _translation = new Vec3;
+    @property
+    _translationRange = new Vec3;
 
     @float
     get spacing () { return this._spacing; };
@@ -52,10 +57,27 @@ export default class Sower extends SplineUtilRenderer {
     get scaleRange () { return this._scaleRange; };
     set scaleRange (v) { this._scaleRange = v; this.dirty = true; };
 
+    @property
+    get translation () {
+        return this._translation;
+    }
+    set translation (v) {
+        this._translation.set(v);
+        this.dirty = true;
+    }
+    @property
+    get translationRange () {
+        return this._translationRange;
+    }
+    set translationRange (v) {
+        this._translationRange.set(v);
+        this.dirty = true;
+    }
+
     @type(Prefab)
     get prefab () { return this._prefab; };
-    set prefab (v) { 
-        this._prefab = v; 
+    set prefab (v) {
+        this._prefab = v;
         this.generated.removeAllChildren();
         this.dirty = true;
     };
@@ -73,8 +95,9 @@ export default class Sower extends SplineUtilRenderer {
         let splineCurve = this.splineCurve;
         let used = 0;
         while (distance <= splineCurve.length) {
-
-            let sample = splineCurve.getSampleAtDistance(distance);
+            let localXOffset = this.translation.x + Math.random() * this.translationRange.x * Math.sign(this.translation.x) + distance;
+            localXOffset = Math.min(localXOffset, splineCurve.length)
+            let sample = splineCurve.getSampleAtDistance(localXOffset);
 
             let node = children[used];
             if (!node) {
@@ -86,17 +109,25 @@ export default class Sower extends SplineUtilRenderer {
             let rangedScale = this.scale + Math.random() * this.scaleRange;
             rangedScale *= Math.min(sample.scale.x, sample.scale.y);
             node.setScale(rangedScale, rangedScale, rangedScale);
-            
+
             Quat.fromEuler(tempQuat, this.rotation.x, this.rotation.y, this.rotation.z);
             Quat.multiply(tempQuat, sample.rotation, tempQuat);
             node.setRotation(tempQuat);
-            
+
             // move orthogonaly to the spline, according to offset + random
-            let binormal = Vec3.transformQuat(tempBinormal, cc.Vec3.RIGHT, Quat.fromViewUp(tempQuat, sample.tangent, sample.up)).normalize();
-            let localOffset = this.offset + Math.random() * this.offsetRange * Math.sign(this.offset);
-            localOffset *= sample.scale.x;
-            binormal.multiplyScalar(localOffset);
-            node.position = binormal.add(sample.location);
+            let zOffset = pool.Vec3.get();
+            zOffset = Vec3.transformQuat(zOffset, cc.Vec3.RIGHT, Quat.fromViewUp(tempQuat, sample.tangent, sample.up)).normalize();
+            let localZOffset = this.translation.z + Math.random() * this.translationRange.z * Math.sign(this.translation.z);
+            localZOffset *= sample.scale.x;
+            zOffset.multiplyScalar(localZOffset);
+
+            let yOffset = pool.Vec3.get();
+            yOffset.set(sample.transformedUp).normalize();
+            let localYOffset = this.translation.y + Math.random() * this.translationRange.y * Math.sign(this.translation.y);
+            localYOffset *= sample.scale.y;
+            yOffset.multiplyScalar(localYOffset);
+
+            node.position = zOffset.add(yOffset).add(sample.location);
 
             distance += this.spacing + Math.random() * this.spacingRange;
 
