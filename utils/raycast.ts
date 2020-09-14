@@ -58,7 +58,7 @@ const narrowphase = (vb: Float32Array, ib: IBArray, pm: GFXPrimitiveMode, sides:
 };
 
 export default {
-    raycastAllModels (renderScene: renderer.RenderScene, worldRay: geometry.ray, mask = Layers.Enum.DEFAULT, distance = Infinity): { node: Node, distance: number }[] {
+    raycastAllModels (renderScene: renderer.scene.RenderScene, worldRay: geometry.ray, mask = Layers.Enum.DEFAULT, distance = Infinity): { node: Node, distance: number }[] {
         resultModels.length = 0;
 
         for (const m of renderScene.models) {
@@ -67,14 +67,14 @@ export default {
             // broadphase
             let d = intersect.ray_aabb(worldRay, m.worldBounds);
             if (d <= 0 || d >= distance) { continue; }
-            if (m.type === renderer.ModelType.DEFAULT) {
+            if (m.type === renderer.scene.ModelType.DEFAULT) {
                 // transform ray back to model space
                 Mat4.invert(m4, transform.getWorldMatrix(m4));
                 Vec3.transformMat4(modelRay.o, worldRay.o, m4);
                 Vec3.normalize(modelRay.d, Vec3.transformMat4Normal(modelRay.d, worldRay.d, m4));
                 d = Infinity;
-                for (let i = 0; i < m.subModelNum; ++i) {
-                    const subModel = m.getSubModel(i).subMeshData;
+                for (let i = 0; i < m.subModels.length; ++i) {
+                    const subModel = m.subModels[i].subMesh;
                     if (subModel && subModel.geometricInfo) {
                         const { positions: vb, indices: ib, doubleSided: sides } = subModel.geometricInfo;
                         narrowphase(vb, ib!, subModel.primitiveMode, sides!, distance);
@@ -95,7 +95,7 @@ export default {
         return resultModels;
     },
 
-    raycastModels (models: renderer.Model[], worldRay: geometry.ray, mask = Layers.Enum.DEFAULT, distance = Infinity): { node: Node, distance: number }[] {
+    raycastModels (models: renderer.scene.Model[], worldRay: geometry.ray, mask = Layers.Enum.DEFAULT, distance = Infinity): { node: Node, distance: number }[] {
         resultModels.length = 0;
 
         for (const m of models) {
@@ -104,14 +104,14 @@ export default {
             // broadphase
             let d = intersect.ray_aabb(worldRay, m.worldBounds);
             if (d <= 0 || d >= distance) { continue; }
-            if (m.type === renderer.ModelType.DEFAULT) {
+            if (m.type === renderer.scene.ModelType.DEFAULT) {
                 // transform ray back to model space
                 Mat4.invert(m4, transform.getWorldMatrix(m4));
                 Vec3.transformMat4(modelRay.o, worldRay.o, m4);
                 Vec3.normalize(modelRay.d, Vec3.transformMat4Normal(modelRay.d, worldRay.d, m4));
                 d = Infinity;
-                for (let i = 0; i < m.subModelNum; ++i) {
-                    const subModel = m.getSubModel(i).subMeshData;
+                for (let i = 0; i < m.subModels.length; ++i) {
+                    const subModel = m.subModels[i].subMesh;
                     if (subModel && subModel.geometricInfo) {
                         const { positions: vb, indices: ib, doubleSided: sides } = subModel.geometricInfo;
                         narrowphase(vb, ib!, subModel.primitiveMode, sides!, distance);
@@ -132,21 +132,21 @@ export default {
         return resultModels;
     },
 
-    raycastModel (m: renderer.Model, worldRay: geometry.ray, distance = Infinity): { node: Node, distance: number } | null {
+    raycastModel (m: renderer.scene.Model, worldRay: geometry.ray, distance = Infinity): { node: Node, distance: number } | null {
         const transform = m.transform;
         // broadphase
         let d = intersect.ray_aabb(worldRay, m.worldBounds);
         if (d <= 0 || d >= distance) { 
             return null; 
         }
-        if (m.type === renderer.ModelType.DEFAULT) {
+        if (m.type === renderer.scene.ModelType.DEFAULT) {
             // transform ray back to model space
             Mat4.invert(m4, transform.getWorldMatrix(m4));
             Vec3.transformMat4(modelRay.o, worldRay.o, m4);
             Vec3.normalize(modelRay.d, Vec3.transformMat4Normal(modelRay.d, worldRay.d, m4));
             d = Infinity;
-            for (let i = 0; i < m.subModelNum; ++i) {
-                const subModel = m.getSubModel(i).subMeshData;
+            for (let i = 0; i < m.subModels.length; ++i) {
+                const subModel = m.subModels[i].subMesh;
                 if (subModel && subModel.geometricInfo) {
                     const { positions: vb, indices: ib, doubleSided: sides } = subModel.geometricInfo;
                     narrowphase(vb, ib!, subModel.primitiveMode, sides!, distance);
