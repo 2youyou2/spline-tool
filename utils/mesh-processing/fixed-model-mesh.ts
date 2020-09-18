@@ -67,8 +67,8 @@ export default class FixedModelMesh {
         let meshStruct: Mesh.IStruct = {
             vertexBundles: [],
             primitives: [],
-            // minPosition: new Vec3,
-            // maxPosition: new Vec3
+            minPosition: new Vec3,
+            maxPosition: new Vec3
         };
         for (let i = 0; i < buffers.length; i++) {
             const vertexBundle: Mesh.IVertexBundle = {

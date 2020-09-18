@@ -122,9 +122,17 @@ export default class ScatterItem {
 
             let model = child.getComponent(ModelComponent);
             let mesh = new Mesh();
+
+            if (!structs[i].minPosition) {
+                structs[i].minPosition = new Vec3;
+            }
+            if (!structs[i].maxPosition) {
+                structs[i].maxPosition = new Vec3;
+            }
+
             mesh.reset({
                 struct: structs[i],
-                data: virtualMesh.data
+                data: virtualMesh.data,
             })
             model.mesh = mesh;
         }

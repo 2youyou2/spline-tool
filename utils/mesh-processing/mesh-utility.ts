@@ -184,13 +184,14 @@ export default {
         ib.update(ibuffer.buffer);
 
         // update ia
-        let model = modelComp.model && modelComp.model.getSubModel(0);
+        let model = modelComp.model && modelComp.model.subModels[0];
         if (!model) return;
         let ia = model.inputAssembler;
         if (!ia) return;
         ia.vertexCount = vertCount;
         ia.indexCount = newIBSize;
-        model.updateCommandBuffer();
+        model.update();
+        // model.updateCommandBuffer();
     },
 
     updateOrCreateModelMesh (model: ModelComponent, primitive, forceCreate = false) {
