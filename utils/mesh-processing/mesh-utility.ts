@@ -13,27 +13,14 @@ const primitiveAttr = {
         size: 2,
         gfxName: GFXAttributeName.ATTR_TEX_COORD
     },
-    colors: {
-        size: 4,
-        gfxName: GFXAttributeName.ATTR_COLOR
-    },
-
-
-    // custom
     tangents: {
         size: 4,
         gfxName: GFXAttributeName.ATTR_TANGENT
-    },
-    uvs1: {
-        size: 2,
-        gfxName: GFXAttributeName.ATTR_TEX_COORD1
-    },
+    }
 }
 
 const customAttributes = {
-    tangents: { name: GFXAttributeName.ATTR_TANGENT, format: GFXFormat.RGBA32F },
-    uvs1: { name: GFXAttributeName.ATTR_TEX_COORD1, format: GFXFormat.RG32F },
-
+    tagent: { name: GFXAttributeName.ATTR_TANGENT, format: GFXFormat.RGBA32F }
 }
 
 function flat (arr: any) {
@@ -105,22 +92,16 @@ export default {
             }
         }
 
-        primitive.customAttributes = [];
-        for (let name in customAttributes) {
-            if (primitive[name]) {
-                primitive[name] = flat(primitive[name]);
-                primitive.customAttributes.push(
-                    {
-                        attr: customAttributes[name],
-                        values: primitive[name]
-                    }
-                )
-            }
+        if (primitive.tangents) {
+            primitive.customAttributes = [
+                {
+                    attr: customAttributes.tagent,
+                    values: primitive.tangents
+                }
+            ]
         }
 
-        return cc.utils.createMesh(primitive, null, {
-            calculateBounds: true
-        });
+        return utils.createMesh(primitive);
     },
 
     updateMesh (modelComp: ModelComponent, primitive: any) {
@@ -194,8 +175,8 @@ export default {
         // model.updateCommandBuffer();
     },
 
-    updateOrCreateModelMesh (model: ModelComponent, primitive, forceCreate = false) {
-        if (!model.mesh || forceCreate) {
+    updateOrCreateModelMesh (model: ModelComponent, primitive) {
+        if (!model.mesh) {
             model.mesh = this.createMesh(primitive);
         }
         else {

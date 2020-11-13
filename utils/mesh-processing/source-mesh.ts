@@ -93,9 +93,9 @@ export default class SourceMesh {
     constructor (mesh: Mesh | SourceMesh) {
         if (mesh instanceof Mesh) {
             this._mesh = mesh;
-            this.translation = cc.v3();
-            this.rotation = cc.quat();
-            this.scale = cc.v3();
+            this.translation = new Vec3();
+            this.rotation = new Quat();
+            this.scale = new Vec3();
         }
         else {
             this._mesh = mesh._mesh;
@@ -179,7 +179,7 @@ export default class SourceMesh {
             let hasUv1s = uv1s && uv1s.length > 0;
 
             let colors = this._mesh.readAttribute(si, GFXAttributeName.ATTR_COLOR);
-            let hasColors = uv1s && uv1s.length > 0;
+            let hasColors = colors && colors.length > 0;
 
             let vertCount = positions.length / 3;
             let i = 0;
@@ -221,7 +221,7 @@ export default class SourceMesh {
                     // Vec4.multiply(transformed.tangent, transformed.tangent, this.scale);
                 }
                 transformed.position.add(this.translation);
-                
+
                 transformed.flag = flag;
             }
 

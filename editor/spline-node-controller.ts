@@ -1,7 +1,8 @@
-import { Node, Color } from 'cc'
+import { Node, Color, Vec3 } from 'cc'
 import Controller from './base/controller';
 import { createLineShape, getNodeWorldPostion } from './utils';
 import { SplineMoveType } from './types';
+import { cce } from './define';
 
 const SPLINE_NODE_SIZE = 10;
 
@@ -24,20 +25,20 @@ export default class SplineNodeController extends Controller {
     initShape () {
         this.createShapeNode('BoxController');
 
-        let cube = window.cce.gizmos.ControllerUtils.cube(SPLINE_NODE_SIZE, SPLINE_NODE_SIZE, SPLINE_NODE_SIZE, Color.YELLOW);
+        let cube = cce.gizmos.ControllerUtils.cube(SPLINE_NODE_SIZE, SPLINE_NODE_SIZE, SPLINE_NODE_SIZE, Color.YELLOW);
         cube.parent = this.shape;
         this.positionNode = cube;
-        this.initAxis(cube, SplineMoveType.Position);
+        this.initHandle(cube, SplineMoveType.Position);
 
-        cube = window.cce.gizmos.ControllerUtils.cube(SPLINE_NODE_SIZE, SPLINE_NODE_SIZE, SPLINE_NODE_SIZE, Color.YELLOW);
+        cube = cce.gizmos.ControllerUtils.cube(SPLINE_NODE_SIZE, SPLINE_NODE_SIZE, SPLINE_NODE_SIZE, Color.YELLOW);
         cube.parent = this.shape;
         this.directionNode = cube;
-        this.initAxis(cube, SplineMoveType.Direction);
+        this.initHandle(cube, SplineMoveType.Direction);
 
-        cube = window.cce.gizmos.ControllerUtils.cube(SPLINE_NODE_SIZE, SPLINE_NODE_SIZE, SPLINE_NODE_SIZE, Color.YELLOW);
+        cube = cce.gizmos.ControllerUtils.cube(SPLINE_NODE_SIZE, SPLINE_NODE_SIZE, SPLINE_NODE_SIZE, Color.YELLOW);
         cube.parent = this.shape;
         this.invDirectionNode = cube;
-        this.initAxis(cube, SplineMoveType.InvDirection);
+        this.initHandle(cube, SplineMoveType.InvDirection);
 
         this._directionLineShape = createLineShape('Direction Line', Color.RED);
         this._directionLineShape.parent = this.shape;
@@ -87,12 +88,12 @@ export default class SplineNodeController extends Controller {
     }
 
     getSplineNodeWorldPosition () {
-        return this.positionNode.getWorldPosition(cc.v3());
+        return this.positionNode.getWorldPosition(new Vec3);
     }
     getSplineNodeWorldDirection () {
-        return this.directionNode.getWorldPosition(cc.v3());
+        return this.directionNode.getWorldPosition(new Vec3);
     }
     getSplineNodeWorldInvDirection () {
-        return this.invDirectionNode.getWorldPosition(cc.v3());
+        return this.invDirectionNode.getWorldPosition(new Vec3);
     }
 };

@@ -1,23 +1,25 @@
-import { Node } from 'cc'
+import { js, Node } from 'cc'
+import { cce } from '../define';
 import { callGizmoFunction } from '../utils';
 import _Gizmo from './gizmo';
 
 
 export default class Controller {
     //#region  TODO: change to declare 
-    public shape: Node|null = null;
-    createShapeNode (name: String) { return window.cce.gizmos.ControllerBase.prototype.createShapeNode.call(this, name); }
-    initAxis (node: Node, axisName: String | Number) { return window.cce.gizmos.ControllerBase.prototype.initAxis.call(this, node, axisName); }
-    updateController () { return window.cce.gizmos.ControllerBase.prototype.updateController.call(this); }
-    show () { return window.cce.gizmos.ControllerBase.prototype.show.call(this); }
-    hide () { return window.cce.gizmos.ControllerBase.prototype.hide.call(this); }
-    registerCameraMovedEvent () { return window.cce.gizmos.ControllerBase.prototype.registerCameraMovedEvent.call(this); }
-    unregisterCameraMoveEvent () { return window.cce.gizmos.ControllerBase.prototype.unregisterCameraMoveEvent.call(this); }
-    adjustControllerSize () { return window.cce.gizmos.ControllerBase.prototype.adjustControllerSize.call(this); }
+    public shape: Node | null = null;
+    public _lockSize = true;
+    createShapeNode (name: String) { return cce.gizmos.ControllerBase.prototype.createShapeNode.call(this, name); }
+    initHandle (node: Node, axisName: String | Number) { return cce.gizmos.ControllerBase.prototype.initHandle.call(this, node, axisName); }
+    updateController () { return cce.gizmos.ControllerBase.prototype.updateController.call(this); }
+    show () { return cce.gizmos.ControllerBase.prototype.show.call(this); }
+    hide () { return cce.gizmos.ControllerBase.prototype.hide.call(this); }
+    registerCameraMovedEvent () { return cce.gizmos.ControllerBase.prototype.registerCameraMovedEvent.call(this); }
+    unregisterCameraMoveEvent () { return cce.gizmos.ControllerBase.prototype.unregisterCameraMoveEvent.call(this); }
+    adjustControllerSize () { return cce.gizmos.ControllerBase.prototype.adjustControllerSize.call(this); }
     //#endregion
 
     constructor (rootNode) {
-        cc.js.addon(this, new window.cce.gizmos.ControllerBase(rootNode));
+        js.addon(this, new cce.gizmos.ControllerBase(rootNode));
     }
 
     onControllerMouseDown (event) { }
@@ -40,6 +42,6 @@ export default class Controller {
 
 if (CC_EDITOR) {
     callGizmoFunction(() => {
-        Object.setPrototypeOf(Controller.prototype, window.cce.gizmos.ControllerBase.prototype);
+        Object.setPrototypeOf(Controller.prototype, cce.gizmos.ControllerBase.prototype);
     })
 }

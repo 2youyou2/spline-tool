@@ -1,4 +1,4 @@
-import { _decorator, Node, Prefab, isPropertyModifier, Vec4, Quat, Vec3 } from 'cc';
+import { _decorator, Node, Prefab, isPropertyModifier, Vec4, Quat, Vec3, instantiate } from 'cc';
 import SplineUtilRenderer from './spline-util-renderer';
 import Event from '../utils/event';
 import pool from '../utils/pool';
@@ -101,7 +101,7 @@ export default class Sower extends SplineUtilRenderer {
 
             let node = children[used];
             if (!node) {
-                node = cc.instantiate(this.prefab);
+                node = instantiate(this.prefab);
                 node.parent = this.generated;
             }
 
@@ -116,7 +116,7 @@ export default class Sower extends SplineUtilRenderer {
 
             // move orthogonaly to the spline, according to offset + random
             let zOffset = pool.Vec3.get();
-            zOffset = Vec3.transformQuat(zOffset, cc.Vec3.RIGHT, Quat.fromViewUp(tempQuat, sample.tangent, sample.up)).normalize();
+            zOffset = Vec3.transformQuat(zOffset, Vec3.RIGHT, Quat.fromViewUp(tempQuat, sample.tangent, sample.up)).normalize();
             let localZOffset = this.translation.z + Math.random() * this.translationRange.z * Math.sign(this.translation.z);
             localZOffset *= sample.scale.x;
             zOffset.multiplyScalar(localZOffset);

@@ -1,24 +1,22 @@
 import FixedBuffer, { AttributesKey, builtinAttributes } from "./fixed-buffer";
-import { Mesh, GFXFormatInfos, GFXPrimitiveMode, IGFXAttribute, utils, ModelComponent, Vec3 } from "cc";
+import { Mesh, GFXFormatInfos, GFXPrimitiveMode, IGFXAttribute, utils, ModelComponent, Vec3, gfx } from "cc";
 
 const MAX_VERTICES_COUNT = 65535;
 
 export default class FixedModelMesh {
     static create (verticesCount: number, indicesCount: number, modelComp: ModelComponent, modelCount: number, attributes: AttributesKey[] = ['position', 'normal', 'tangent', 'uv', 'uv1']) {
         let fixedModelMesh = new FixedModelMesh();
-        
-        let gfxAttrs: IGFXAttribute[] = [];
+
+        let gfxAttrs: gfx.Attribute[] = [];
         let attrs: any = {};
 
         let stride = 0;
         for (let i = 0; i < attributes.length; i++) {
             let builtinAttribute = builtinAttributes[attributes[i]];
             let format = builtinAttribute.format;
-            
-            gfxAttrs.push({
-                name: builtinAttribute.name,
-                format,
-            })
+
+            gfxAttrs.push(new gfx.Attribute(builtinAttribute.name, format));
+
             attrs[attributes[i]] = {
                 gfxIndex: i,
                 offset: stride,
@@ -31,7 +29,7 @@ export default class FixedModelMesh {
 
         fixedModelMesh._attrs = attrs;
         fixedModelMesh._stride = stride;
-        
+
         let buffers = fixedModelMesh._buffers;
 
         let totalVerticesBytes = modelCount * verticesCount * stride;
@@ -50,7 +48,7 @@ export default class FixedModelMesh {
             let buffer = FixedBuffer.create(
                 currCount * verticesCount,
                 currCount * indicesCount,
-                attributes, 
+                attributes,
                 {
                     arrayBuffer,
                     arrayBufferVerticesOffset,
@@ -81,7 +79,7 @@ export default class FixedModelMesh {
                 },
             };
             meshStruct.vertexBundles.push(vertexBundle)
-            
+
             const primitive: Mesh.ISubMesh = {
                 primitiveMode: GFXPrimitiveMode.TRIANGLE_LIST,
                 vertexBundelIndices: [i],
@@ -94,7 +92,7 @@ export default class FixedModelMesh {
             }
             meshStruct.primitives.push(primitive)
         }
-        
+
         let mesh = new Mesh();
         mesh.reset({
             struct: meshStruct,
@@ -141,13 +139,13 @@ export default class FixedModelMesh {
             let ib = subMesh.indexBuffer;
             ib.update(fixedBuffer._ibuffer);
 
-            let model = modelComp.model && modelComp.model.getSubModel(i);
+            let model = modelComp.model && modelComp.model.subModels[i];
             if (model) {
                 let ia = model.inputAssembler;
                 if (!ia) return;
                 ia.vertexCount = fixedBuffer.verticesCount;
                 ia.indexCount = fixedBuffer.indicesCount;
-                model.updateCommandBuffer();
+                model.update();
             }
         }
     }

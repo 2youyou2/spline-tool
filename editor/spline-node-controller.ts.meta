@@ -1,5 +1,5 @@
 {
-  "ver": "2.0.14",
+  "ver": "4.0.3",
   "importer": "typescript",
   "imported": true,
   "uuid": "055a80d3-41fd-4bf3-a8e8-4bcb7230fc3e",
@@ -10,6 +10,7 @@
   "subMetas": {},
   "userData": {
     "importAsPlugin": false,
-    "moduleId": "project:///assets/spline/src/editor/spline-node-controller.js"
+    "moduleId": "project:///assets/spline/src/editor/spline-node-controller.js",
+    "importerSettings": 7
   }
 }

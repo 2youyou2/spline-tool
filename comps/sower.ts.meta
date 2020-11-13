@@ -1,5 +1,5 @@
 {
-  "ver": "2.0.14",
+  "ver": "4.0.3",
   "importer": "typescript",
   "imported": true,
   "uuid": "3c44969e-3279-44a2-acef-ec425d0edbd7",
@@ -10,6 +10,7 @@
   "subMetas": {},
   "userData": {
     "importAsPlugin": false,
-    "moduleId": "project:///assets/spline/src/comps/sower.js"
+    "moduleId": "project:///assets/spline/src/comps/sower.js",
+    "importerSettings": 7
   }
 }

@@ -1,5 +1,5 @@
 {
-  "ver": "2.0.14",
+  "ver": "4.0.3",
   "importer": "typescript",
   "imported": true,
   "uuid": "6eeea3ae-85f1-48de-8d6e-b3a5ad1acb6b",
@@ -10,6 +10,7 @@
   "subMetas": {},
   "userData": {
     "importAsPlugin": false,
-    "moduleId": "project:///assets/spline/src/comps/spline-util-base.js"
+    "moduleId": "project:///assets/spline/src/comps/spline-util-base.js",
+    "importerSettings": 7
   }
 }

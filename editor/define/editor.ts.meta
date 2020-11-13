@@ -2,7 +2,7 @@
   "ver": "4.0.3",
   "importer": "typescript",
   "imported": true,
-  "uuid": "4a58785d-a1e4-4f6a-8321-b57176424f85",
+  "uuid": "ecf77eff-0b7d-4c54-935a-99398a482fb7",
   "files": [
     ".js",
     ".trans"
@@ -10,7 +10,7 @@
   "subMetas": {},
   "userData": {
     "importAsPlugin": false,
-    "moduleId": "project:///assets/spline/src/comps/mesh-tiling.js",
+    "moduleId": "project:///assets/spline/src/editor/define/editor.js",
     "importerSettings": 7
   }
 }

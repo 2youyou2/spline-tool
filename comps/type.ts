@@ -2,6 +2,7 @@ import { Enum } from 'cc';
 
 export enum ScatterType {
     Mesh,
+    Item,
     Instance,
 }
 Enum(ScatterType);

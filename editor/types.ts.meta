@@ -1,5 +1,5 @@
 {
-  "ver": "2.0.14",
+  "ver": "4.0.3",
   "importer": "typescript",
   "imported": true,
   "uuid": "f04a08fd-3883-4282-b921-d33761757ae9",
@@ -10,6 +10,7 @@
   "subMetas": {},
   "userData": {
     "importAsPlugin": false,
-    "moduleId": "project:///assets/spline/src/editor/types.js"
+    "moduleId": "project:///assets/spline/src/editor/types.js",
+    "importerSettings": 7
   }
 }

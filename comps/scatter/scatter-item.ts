@@ -1,4 +1,4 @@
-import { _decorator, Node, Prefab, Vec4, Quat, Vec3, Mat4, ModelComponent, Vec2, Mesh } from 'cc';
+import { _decorator, Node, Prefab, Vec4, Quat, Vec3, Mat4, ModelComponent, Vec2, Mesh, instantiate, warn } from 'cc';
 import SourceMesh from '../../utils/mesh-processing/source-mesh';
 import FixedModelMesh from '../../utils/mesh-processing/fixed-model-mesh';
 import { ScatterType } from '../type';
@@ -19,7 +19,7 @@ export default class ScatterItem {
     @type(Prefab)
     _prefab: Prefab = null;
     @property
-    _type = ScatterType.Mesh;
+    _type = ScatterType.Instance;
     @property
     _volume = 1;
 
@@ -52,7 +52,7 @@ export default class ScatterItem {
 
     @property
     protected _meshStructs: Mesh.IStruct[] = [];
-    
+
     protected _sourceMesh: SourceMesh = null;
 
     init (node, maxCount, dataType: ScatterType) {
@@ -66,7 +66,7 @@ export default class ScatterItem {
         if (this._type === ScatterType.Mesh) {
             this.node.removeAllChildren();
 
-            let tempNode: Node = cc.instantiate(this.prefab);
+            let tempNode: Node = instantiate(this.prefab);
             tempNode.setPosition(0, 0, 0);
             let tempModel = tempNode.getComponent(ModelComponent) || tempNode.getComponentInChildren(ModelComponent);
             if (tempModel && tempModel.mesh) {
@@ -116,7 +116,7 @@ export default class ScatterItem {
         for (let i = 0; i < structs.length; i++) {
             let child = children[i];
             if (!child) {
-                cc.warn('Can not find scatter item children ' + i);
+                warn('Can not find scatter item children ' + i);
                 continue;
             }
 
@@ -218,7 +218,7 @@ export default class ScatterItem {
     protected updateInstance (position: Vec3, scale: Vec3, rotation: Quat) {
         let node = this.node.children[this.currentCount];
         if (!node) {
-            node = cc.instantiate(this.prefab);
+            node = instantiate(this.prefab);
             node.parent = this.node;
         }
         node.position = position;

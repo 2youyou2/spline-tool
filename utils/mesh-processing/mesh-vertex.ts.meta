@@ -1,5 +1,5 @@
 {
-  "ver": "2.0.14",
+  "ver": "4.0.3",
   "importer": "typescript",
   "imported": true,
   "uuid": "a0f005aa-0131-413b-9e78-049eb603c81f",
@@ -10,6 +10,7 @@
   "subMetas": {},
   "userData": {
     "importAsPlugin": false,
-    "moduleId": "project:///assets/spline/src/utils/mesh-processing/mesh-vertex.js"
+    "moduleId": "project:///assets/spline/src/utils/mesh-processing/mesh-vertex.js",
+    "importerSettings": 7
   }
 }

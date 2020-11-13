@@ -1,19 +1,29 @@
 import Gizmo from './base/gizmo';
-import { getNodeLocalPostion, getNodeWorldPostion, findComponentInParent } from './utils';
+import { getNodeLocalPostion, getNodeWorldPostion } from './utils';
 
 import SplineNodeController from './spline-node-controller';
 import ContinuousLineController from './continuous-line-controller';
 import pool from '../utils/pool';
 import SplineNode from '../spline-node';
 import Spline from '../spline';
-import { Component, AnimationComponent, Node, Vec3 } from 'cc';
+import { Component, AnimationComponent, Node, Vec3, warn } from 'cc';
 import { SplineMoveType } from './types';
-import { SplineGridUtil } from './comps/spline-grid-util';
+import { cce } from './define';
 
 if (CC_EDITOR) {
 
+    function findComponentInParent (node: Node, ctor) {
+        let parent: Node = node;
+        while (parent) {
+            let comp = parent.getComponent(ctor);
+            if (comp) return comp;
+            parent = parent.parent;
+        }
+        return null;
+    }
+
+
     let tempVec3 = new Vec3
-    let tempVec3_2 = new Vec3
 
     class SplineGizmo extends Gizmo {
         moveTarget = null;
@@ -198,7 +208,7 @@ if (CC_EDITOR) {
             let controller = this.splineNodeControllers[index];
             if (moveType !== SplineMoveType.Node) {
                 if (!splineNode || !controller) {
-                    cc.warn(`Can not select spline index ${index}`);
+                    warn(`Can not select spline index ${index}`);
                     moveType = SplineMoveType.Node;
                 }
             }
@@ -228,7 +238,7 @@ if (CC_EDITOR) {
             let controller = new SplineNodeController(this.getGizmoRoot());
 
             controller.onControllerMouseDown = (event) => {
-                this.selectIndex(index, event.axisName);
+                this.selectIndex(index, event.handleName);
             };
             controller.onControllerMouseMove = () => {
 
@@ -241,7 +251,7 @@ if (CC_EDITOR) {
         }
 
         createMoveController () {
-            let controller = new window.cce.gizmos.PositionController(this.getGizmoRoot());
+            let controller = new cce.gizmos.PositionController(this.getGizmoRoot());
             controller.onControllerMouseDown = () => {
                 this.spline.gizmoEditing = true;
             };
@@ -282,27 +292,6 @@ if (CC_EDITOR) {
                 }
             };
             controller.onControllerMouseUp = () => {
-                if (this.moveType !== SplineMoveType.Node) {
-                    let splineNode = this.moveTarget;
-                    let gridUtil = this.spline.getComponent(SplineGridUtil);
-                    if (gridUtil) {
-                        tempVec3.set(
-                            splineNode.position.x - splineNode.position.x % gridUtil.splineNodeGrid.x,
-                            splineNode.position.y - splineNode.position.y % gridUtil.splineNodeGrid.y,
-                            splineNode.position.z - splineNode.position.z % gridUtil.splineNodeGrid.z,
-                        );
-                        Vec3.subtract(tempVec3_2, tempVec3, splineNode.position);
-                        splineNode.position = tempVec3
-
-                        splineNode.direction = tempVec3_2.add(splineNode.direction)
-
-                        this.updateControllerTransform();
-                        this.updateMoveControllderPos();
-                    }
-
-                    this.onComponentChanged(this.spline.node);
-                }
-
                 this.spline.gizmoEditing = false;
 
                 if (controller.updated) {

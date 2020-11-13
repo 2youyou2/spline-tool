@@ -1,5 +1,5 @@
 {
-  "ver": "2.0.14",
+  "ver": "4.0.3",
   "importer": "typescript",
   "imported": true,
   "uuid": "c7eb56d3-4c2d-4873-9f16-071ca4684b3c",
@@ -10,6 +10,7 @@
   "subMetas": {},
   "userData": {
     "importAsPlugin": false,
-    "moduleId": "project:///assets/spline/src/utils/mathf.js"
+    "moduleId": "project:///assets/spline/src/utils/mathf.js",
+    "importerSettings": 7
   }
 }

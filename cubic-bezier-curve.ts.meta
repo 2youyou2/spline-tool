@@ -1,5 +1,5 @@
 {
-  "ver": "2.0.14",
+  "ver": "4.0.3",
   "importer": "typescript",
   "imported": true,
   "uuid": "5325f2df-3768-422b-9612-00c404d1f7d8",
@@ -10,6 +10,7 @@
   "subMetas": {},
   "userData": {
     "importAsPlugin": false,
-    "moduleId": "project:///assets/spline/src/cubic-bezier-curve.js"
+    "moduleId": "project:///assets/spline/src/cubic-bezier-curve.js",
+    "importerSettings": 7
   }
 }

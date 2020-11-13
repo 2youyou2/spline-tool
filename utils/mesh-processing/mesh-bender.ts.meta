@@ -1,5 +1,5 @@
 {
-  "ver": "2.0.14",
+  "ver": "4.0.3",
   "importer": "typescript",
   "imported": true,
   "uuid": "e6d5c63f-993e-497f-9d31-0cd1fa70ecca",
@@ -10,6 +10,7 @@
   "subMetas": {},
   "userData": {
     "importAsPlugin": false,
-    "moduleId": "project:///assets/spline/src/utils/mesh-processing/mesh-bender.js"
+    "moduleId": "project:///assets/spline/src/utils/mesh-processing/mesh-bender.js",
+    "importerSettings": 7
   }
 }

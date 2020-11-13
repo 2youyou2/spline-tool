@@ -1,12 +1,11 @@
 import SplineUtilBase from "./spline-util-base"
-import { Node, _decorator, PrivateNode, Mat4 } from "cc";
-import Event from "../utils/event";
+import { Node, _decorator, PrivateNode, Mat4, find, js, CCObject } from "cc";
 
 const { ccclass, property } = _decorator;
 
 const RebuildAfterTime = 0;
 
-@ccclass(SplineUtilRenderer)
+@ccclass('SplineUtilRenderer')
 export default class SplineUtilRenderer extends SplineUtilBase {
     @property
     _showGenerated = false;
@@ -25,16 +24,12 @@ export default class SplineUtilRenderer extends SplineUtilBase {
             if (this._generated) {
                 this._generated.parent = null;
             }
-            let generatedName = 'generated ' + cc.js.getClassName(this);
-            this._generated = cc.find(generatedName, this.node);
+            let generatedName = 'generated ' + js.getClassName(this);
+            this._generated = find(generatedName, this.node);
             if (!this._generated) {
-                if (this._showGenerated) {
-                    this._generated = new Node(generatedName);
-
-                }
-                else {
-                    this._generated = new PrivateNode(generatedName);
-                    this._generated._objFlags |= cc.Object.Flags.DontSave;
+                this._generated = new Node(generatedName);
+                if (!this._showGenerated) {
+                    this._generated._objFlags |= CCObject.Flags.DontSave | CCObject.Flags.HideInHierarchy;
                 }
                 this._generated.parent = this.node;
             }
@@ -55,7 +50,7 @@ export default class SplineUtilRenderer extends SplineUtilBase {
     protected _onDirtyChanged (value) {
         if (value && !this._dirty) {
             this._dirtyTime = 0;
-        } 
+        }
         this._dirty = value;
     }
 
@@ -119,7 +114,7 @@ export default class SplineUtilRenderer extends SplineUtilBase {
 
     update (dt) {
         this.checkSplineMoved();
-        
+
         if (this.dirty && this.spline) {
             this._dirtyTime += dt;
 

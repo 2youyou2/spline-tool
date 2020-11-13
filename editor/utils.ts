@@ -1,24 +1,25 @@
-import { Node, Mat4, Vec3, Color, ModelComponent, Component } from 'cc';
+import { Node, Mat4, Vec3, Color, ModelComponent, GFXPrimitiveMode, Layers } from 'cc';
 import MeshUtility from '../utils/mesh-processing/mesh-utility';
+import { cce } from './define';
 
 let tempMat4 = new Mat4;
 let tempVec3 = new Vec3;
 
 export function createLineShape (name, color?: Color) {
-    const { createMesh, addMeshToNode, setMeshColor, AttributeName, updateVBAttr, updateIBAttr } = window.cce.gizmos.EngineUtils;
+    const { createMesh, addMeshToNode, setMeshColor, AttributeName, updateVBAttr, updateIBAttr } = cce.gizmos.EngineUtils;
 
     name = name || 'Line';
-    color = color || cc.Color.WHITE;
+    color = color || Color.WHITE;
 
     let mesh = MeshUtility.createMesh({
         positions: [
-            cc.v3(0,0),
-            cc.v3(0,1),
-            cc.v3(1,0),
-            cc.v3(1,1),
+            new Vec3(0, 0, 0),
+            new Vec3(0, 1, 0),
+            new Vec3(1, 0, 0),
+            new Vec3(1, 1, 0),
         ],
-        indices: [ 0, 1, 1, 2, 2, 3],
-        primitiveType: cc.GFXPrimitiveMode.LINE_LIST
+        indices: [0, 1, 1, 2, 2, 3],
+        primitiveType: GFXPrimitiveMode.LINE_LIST
     })
 
     let node: Node = create3DNode(name);
@@ -38,23 +39,23 @@ export function createLineShape (name, color?: Color) {
         MeshUtility.updateOrCreateModelMesh(model, {
             positions: points,
             indices,
-            primitiveType: cc.GFXPrimitiveMode.LINE_LIST
+            primitiveType: GFXPrimitiveMode.LINE_LIST
         })
     }
 
     return node;
 }
 
-export function create3DNode(name: string) {
-    const node = new cc.Node(name);
-    node._layer = cc.Layers.Enum.GIZMOS;
-    node.modelColor = cc.color();
+export function create3DNode (name: string) {
+    const node = new Node(name);
+    node.layer = Layers.Enum.GIZMOS;
+    (node as any).modelColor = new Color();
     return node;
 }
 
 export function callGizmoFunction (cb) {
-    if (!window.cce) return;
-    if (window.cce.gizmos) {
+    if (!cce) return;
+    if (cce.gizmos) {
         cb();
         return;
     }
@@ -94,14 +95,4 @@ export function node2nodeLength (node1: Node, node2: Node, length: number) {
     tempVec3.set(length, 0, 0);
     node2nodePos(node1, node2, tempVec3, tempVec3, true);
     return tempVec3.length();
-}
-
-export function findComponentInParent<T extends Component> (node: Node, ctor: typeof T) {
-    let parent: Node = node;
-    while (parent) {
-        let comp = parent.getComponent(ctor);
-        if (comp) return comp;
-        parent = parent.parent;
-    }
-    return null;
 }

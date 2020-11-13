@@ -1,5 +1,5 @@
 {
-  "ver": "2.0.14",
+  "ver": "4.0.3",
   "importer": "typescript",
   "imported": true,
   "uuid": "bbf2ab18-b693-4d7e-a366-9c0450a6e1f8",
@@ -10,6 +10,7 @@
   "subMetas": {},
   "userData": {
     "importAsPlugin": false,
-    "moduleId": "project:///assets/spline/src/comps/scatter/scatter-volume.js"
+    "moduleId": "project:///assets/spline/src/comps/scatter/scatter-volume.js",
+    "importerSettings": 7
   }
 }

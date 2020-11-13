@@ -1,5 +1,5 @@
 {
-  "ver": "2.0.14",
+  "ver": "4.0.3",
   "importer": "typescript",
   "imported": true,
   "uuid": "77f16d55-b70b-4147-bc4c-4e5e25a100a8",
@@ -10,6 +10,7 @@
   "subMetas": {},
   "userData": {
     "importAsPlugin": false,
-    "moduleId": "project:///assets/spline/src/utils/mesh-processing/mesh-utility.js"
+    "moduleId": "project:///assets/spline/src/utils/mesh-processing/mesh-utility.js",
+    "importerSettings": 7
   }
 }

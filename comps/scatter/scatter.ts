@@ -1,4 +1,4 @@
-import { _decorator, Node, Prefab, isPropertyModifier, Vec4, Quat, Vec3, geometry, randomRange, Mat4, Layers, Terrain, Mesh } from 'cc';
+import { _decorator, Node, Prefab, isPropertyModifier, Vec4, Quat, Vec3, geometry, randomRange, Mat4, Layers, Terrain, Mesh, director, find, js, CCObject } from 'cc';
 import SplineUtilRenderer from './../spline-util-renderer';
 import raycast from '../../utils/raycast';
 import { ScatterVolume } from './scatter-volume';
@@ -6,8 +6,6 @@ import { pointInPolygonAreaXZ, pointInPolygonLineXZ, pointPolygonMinDistXZ } fro
 import { VolumeInfo, VolumeType, ScatterType } from '../type';
 import ScatterItem from './scatter-item';
 import CurveSample from '../../curve-sample';
-import { createMesh, saveMesh } from '../../editor/asset-operation';
-import meshTesselate from '../../utils/mesh-processing/mesh-tesselate';
 
 const { ccclass, executeInEditMode, float, type, boolean, property } = _decorator;
 
@@ -176,26 +174,8 @@ export default class Scatter extends SplineUtilRenderer {
         this.dirty = true;
     }
 
-    @property
-    _cacheToMesh = true;
-    @property
-    get cacheToMesh () {
-        return this._cacheToMesh;
-    }
-    set cacheToMesh (value) {
-        this._cacheToMesh = value;
-        this.dirty = true;
-    }
-
-    @type(Mesh)
-    _virtualMesh: Mesh = null;
-    @type(Mesh)
-    get cacheVirtualMesh () {
-        return this._virtualMesh;
-    }
-
     @type(ScatterType as any)
-    _dataType = ScatterType.Mesh;
+    _dataType = ScatterType.Instance;
     @type(ScatterType as any)
     get dataType () {
         return this._dataType;
@@ -205,25 +185,6 @@ export default class Scatter extends SplineUtilRenderer {
         this.dirty = true;
     }
 
-
-    public onLoad () {
-        if (!this._cacheToMesh || !this._virtualMesh) {
-            // this._updateVolume();
-        }
-        else {
-            this._initWidthVirtualMesh();    
-        }
-    }
-
-    private _initWidthVirtualMesh () {
-        let children = this.generated.children;
-        let items = this._items;
-        for (let i = 0; i < items.length; i++) {
-            items[i].initWithVirtualMesh(children[i], this.cacheVirtualMesh);
-        }
-
-        this.dirty = false;
-    }
 
     private _isPosValid (pos) {
         let pointIn = false;
@@ -335,7 +296,7 @@ export default class Scatter extends SplineUtilRenderer {
             if (this._raycastLayer) {
                 layer = this._raycastLayer.layer;
             }
-            let results = raycast.raycastAllModels(cc.director._scene._renderScene, tempRay, layer);
+            let results = raycast.raycastAllModels(director.getScene()._renderScene, tempRay, layer);
             if (results.length > 0) {
                 randomPos = randomPos;
                 Vec3.scaleAndAdd(randomPos, tempRay.o, tempRay.d, results[0].distance);
@@ -386,50 +347,12 @@ export default class Scatter extends SplineUtilRenderer {
             }
 
             if (this._currentItemCount >= this._itemCount) {
-                this._saveToCache();
+                // finished
             }
         }
         else {
             this.dirty = false;
         }
-    }
-
-    protected _saveToCache () {
-        if (!this.cacheToMesh || !CC_EDITOR) return;
-        let totalBytes = 0;
-        for (let i = 0; i < this.items.length; i++) {
-            let item = this.items[i];
-            for (let j = 0; j < item.fixedMeshes.length; j++) {
-                let mesh = item.fixedMeshes[j].mesh;
-                totalBytes += mesh.data.byteLength;
-            }
-        }
-
-        let data = new Uint8Array(totalBytes);
-        let offset = 0;
-        for (let i = 0; i < this.items.length; i++) {
-            let item = this.items[i];
-            for (let j = 0; j < item.fixedMeshes.length; j++) {
-                item.shiftStructOffset(offset);
-
-                let mesh = item.fixedMeshes[j].mesh;
-                data.set(mesh.data, offset);
-                offset += mesh.data.byteLength;
-            }
-        }
-
-        let mesh = new Mesh;
-        mesh.reset({
-            struct: {
-                vertexBundles: [],
-                primitives: [],
-            },
-            data: data
-        })
-
-        saveMesh('_scatter-cache-data_/' + this.uuid + '.mesh', mesh).then(mesh => {
-            this._virtualMesh = mesh
-        });
     }
 
     protected _resetState () {
@@ -500,10 +423,13 @@ export default class Scatter extends SplineUtilRenderer {
 
     protected get generated () {
         if (!this._generated || this._generated.parent !== this.node) {
-            let generatedName = 'generated ' + cc.js.getClassName(this);
-            this._generated = cc.find(generatedName, this.node);
+            let generatedName = 'generated ' + js.getClassName(this);
+            this._generated = find(generatedName, this.node);
             if (!this._generated) {
                 this._generated = new Node(generatedName);
+                if (!this._showGenerated) {
+                    this._generated._objFlags |= CCObject.Flags.DontSave | CCObject.Flags.HideInHierarchy;
+                }
                 this._generated.parent = this.node;
             }
         }
