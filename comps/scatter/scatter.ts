@@ -1,4 +1,4 @@
-import { _decorator, Node, Prefab, isPropertyModifier, Vec4, Quat, Vec3, geometry, randomRange, Mat4, Layers, Terrain, Mesh, director, find, js, CCObject } from 'cc';
+import { _decorator, Node, Prefab, isPropertyModifier, Vec4, Quat, Vec3, geometry, randomRange, Mat4, Layers, Terrain, Mesh, director, find, js, CCObject, mat4 } from 'cc';
 import SplineUtilRenderer from './../spline-util-renderer';
 import raycast from '../../utils/raycast';
 import { ScatterVolume } from './scatter-volume';
@@ -14,7 +14,7 @@ let DOWN = new Vec3(0, -1, 0);
 let tempPos = new Vec3();
 let tempScale = new Vec3();
 let tempEuler = new Vec3();
-let tempRay = geometry.ray.create();
+let tempRay = geometry.Ray.create();
 let tempMat4 = new Mat4();
 let tempQuat = new Quat();
 let invertMatrix = new Mat4();
@@ -26,6 +26,19 @@ let tempMin = new Vec3;
 let tempMax = new Vec3;
 
 let tempCurveSample = new CurveSample();
+
+@ccclass('StoredScatterData')
+class StoredScatterData {
+    @property
+    itemIndex = -1;
+    @type(Mat4)
+    matrix = new Mat4;
+
+    constructor (itemIndex, matrix) {
+        this.itemIndex = itemIndex;
+        this.matrix.set(matrix);
+    }
+}
 
 
 @ccclass('Scatter')
@@ -91,6 +104,7 @@ export default class Scatter extends SplineUtilRenderer {
 
     protected _onDirtyChanged (value) {
         if (value) {
+            this._storedDatas.length = 0;
             this._updateVolume();
 
             this._dirty = true;
@@ -185,6 +199,8 @@ export default class Scatter extends SplineUtilRenderer {
         this.dirty = true;
     }
 
+    @property
+    _storedDatas: StoredScatterData[] = [];
 
     private _isPosValid (pos) {
         let pointIn = false;
@@ -308,8 +324,14 @@ export default class Scatter extends SplineUtilRenderer {
         return randomPos;
     }
 
+    public onLoad () {
+        this._updateVolume();
+    }
+
     public compute () {
         if (this._items.length <= 0 || !this._hasValidItem) return;
+
+        let storedDatas = this._storedDatas
 
         Mat4.invert(invertMatrix, this.node.worldMatrix);
         if (this._currentItemCount < this._itemCount) {
@@ -317,6 +339,15 @@ export default class Scatter extends SplineUtilRenderer {
 
             for (let i = 0; i < this._generateCountPerFrame; i++) {
                 if (this._currentItemCount >= this._itemCount) break;
+
+                let storedData = storedDatas[this._currentItemCount];
+                if (storedData) {
+                    let item = items[storedData.itemIndex];
+                    if (item.fill(storedData.matrix)) {
+                        this._currentItemCount++;
+                        continue;
+                    }
+                }
 
                 let validPos = this._getNextPosition();
                 if (!validPos) {
@@ -335,7 +366,8 @@ export default class Scatter extends SplineUtilRenderer {
                 Mat4.fromRTS(tempMat4, tempQuat, validPos, tempScale);
 
                 for (let j = 0; j < items.length; j++) {
-                    if (items[j].fill(validPos, tempScale, tempQuat, tempMat4)) {
+                    if (items[j].fill(tempMat4)) {
+                        storedDatas[this._currentItemCount] = new StoredScatterData(j, tempMat4);
                         this._currentItemCount++;
                         break;
                     }

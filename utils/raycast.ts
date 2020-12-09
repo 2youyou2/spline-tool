@@ -1,12 +1,12 @@
 import { geometry, Layers, renderer, Mat4, Vec3, GFXPrimitiveMode, Node } from 'cc'
-const { intersect, ray, triangle } = geometry;
+const { intersect, Ray, Triangle } = geometry;
 
 type IBArray = Uint8Array | Uint16Array | Uint32Array;
 
 let resultModels = [];
 let m4 = new Mat4;
-let modelRay = new ray();
-let tri = triangle.create();
+let modelRay = new Ray();
+let tri = Triangle.create();
 let v3 = new Vec3();
 
 let narrowDis = Infinity;
@@ -22,7 +22,7 @@ const narrowphase = (vb: Float32Array, ib: IBArray, pm: GFXPrimitiveMode, sides:
             Vec3.set(tri.a, vb[i0], vb[i0 + 1], vb[i0 + 2]);
             Vec3.set(tri.b, vb[i1], vb[i1 + 1], vb[i1 + 2]);
             Vec3.set(tri.c, vb[i2], vb[i2 + 1], vb[i2 + 2]);
-            const dist = intersect.ray_triangle(modelRay, tri, sides);
+            const dist = intersect.rayTriangle(modelRay, tri, sides);
             if (dist <= 0 || dist >= narrowDis) { continue; }
             narrowDis = dist;
         }
@@ -37,7 +37,7 @@ const narrowphase = (vb: Float32Array, ib: IBArray, pm: GFXPrimitiveMode, sides:
             Vec3.set(tri.b, vb[i1], vb[i1 + 1], vb[i1 + 2]);
             Vec3.set(tri.c, vb[i2], vb[i2 + 1], vb[i2 + 2]);
             rev = ~rev;
-            const dist = intersect.ray_triangle(modelRay, tri, sides);
+            const dist = intersect.rayTriangle(modelRay, tri, sides);
             if (dist <= 0 || dist >= narrowDis) { continue; }
             narrowDis = dist;
         }
@@ -50,7 +50,7 @@ const narrowphase = (vb: Float32Array, ib: IBArray, pm: GFXPrimitiveMode, sides:
             const i2 = ib[j + 1] * 3;
             Vec3.set(tri.b, vb[i1], vb[i1 + 1], vb[i1 + 2]);
             Vec3.set(tri.c, vb[i2], vb[i2 + 1], vb[i2 + 2]);
-            const dist = intersect.ray_triangle(modelRay, tri, sides);
+            const dist = intersect.rayTriangle(modelRay, tri, sides);
             if (dist <= 0 || dist >= narrowDis) { continue; }
             narrowDis = dist;
         }
@@ -58,14 +58,14 @@ const narrowphase = (vb: Float32Array, ib: IBArray, pm: GFXPrimitiveMode, sides:
 };
 
 export default {
-    raycastAllModels (renderScene: renderer.scene.RenderScene, worldRay: geometry.ray, mask = Layers.Enum.DEFAULT, distance = Infinity): { node: Node, distance: number }[] {
+    raycastAllModels (renderScene: renderer.scene.RenderScene, worldRay: geometry.Ray, mask = Layers.Enum.DEFAULT, distance = Infinity): { node: Node, distance: number }[] {
         resultModels.length = 0;
 
         for (const m of renderScene.models) {
             const transform = m.transform;
             if (!transform || !m.enabled || !(m.node.layer & mask) || !m.worldBounds) { continue; }
             // broadphase
-            let d = intersect.ray_aabb(worldRay, m.worldBounds);
+            let d = intersect.rayAABB(worldRay, m.worldBounds);
             if (d <= 0 || d >= distance) { continue; }
             if (m.type === renderer.scene.ModelType.DEFAULT) {
                 // transform ray back to model space
@@ -95,14 +95,14 @@ export default {
         return resultModels;
     },
 
-    raycastModels (models: renderer.scene.Model[], worldRay: geometry.ray, mask = Layers.Enum.DEFAULT, distance = Infinity): { node: Node, distance: number }[] {
+    raycastModels (models: renderer.scene.Model[], worldRay: geometry.Ray, mask = Layers.Enum.DEFAULT, distance = Infinity): { node: Node, distance: number }[] {
         resultModels.length = 0;
 
         for (const m of models) {
             const transform = m.transform;
             if (!transform || !m.enabled || !(m.node.layer & mask) || !m.worldBounds) { continue; }
             // broadphase
-            let d = intersect.ray_aabb(worldRay, m.worldBounds);
+            let d = intersect.rayAABB(worldRay, m.worldBounds);
             if (d <= 0 || d >= distance) { continue; }
             if (m.type === renderer.scene.ModelType.DEFAULT) {
                 // transform ray back to model space
@@ -132,12 +132,12 @@ export default {
         return resultModels;
     },
 
-    raycastModel (m: renderer.scene.Model, worldRay: geometry.ray, distance = Infinity): { node: Node, distance: number } | null {
+    raycastModel (m: renderer.scene.Model, worldRay: geometry.Ray, distance = Infinity): { node: Node, distance: number } | null {
         const transform = m.transform;
         // broadphase
-        let d = intersect.ray_aabb(worldRay, m.worldBounds);
-        if (d <= 0 || d >= distance) { 
-            return null; 
+        let d = intersect.rayAABB(worldRay, m.worldBounds!);
+        if (d <= 0 || d >= distance) {
+            return null;
         }
         if (m.type === renderer.scene.ModelType.DEFAULT) {
             // transform ray back to model space

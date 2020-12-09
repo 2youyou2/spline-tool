@@ -1,4 +1,4 @@
-import { _decorator, Node, Prefab, Vec4, Quat, Vec3, Mat4, ModelComponent, Vec2, Mesh, instantiate, warn } from 'cc';
+import { _decorator, Node, Prefab, Vec4, Quat, Vec3, Mat4, ModelComponent, Vec2, Mesh, instantiate, warn, mat4 } from 'cc';
 import SourceMesh from '../../utils/mesh-processing/source-mesh';
 import FixedModelMesh from '../../utils/mesh-processing/fixed-model-mesh';
 import { ScatterType } from '../type';
@@ -146,14 +146,14 @@ export default class ScatterItem {
         }
     }
 
-    fill (position: Vec3, scale: Vec3, rotation: Quat, mat: Mat4) {
+    fill (mat: Mat4) {
         if (this.currentCount >= this.maxCount || !this.prefab) return false;
 
         if (this._type === ScatterType.Mesh) {
             this.updateMesh(mat);
         }
         else {
-            this.updateInstance(position, scale, rotation);
+            this.updateInstance(mat);
         }
 
         this.currentCount++;
@@ -215,15 +215,13 @@ export default class ScatterItem {
         }
     }
 
-    protected updateInstance (position: Vec3, scale: Vec3, rotation: Quat) {
+    protected updateInstance (mat: Mat4) {
         let node = this.node.children[this.currentCount];
         if (!node) {
             node = instantiate(this.prefab);
             node.parent = this.node;
         }
-        node.position = position;
-        node.scale = scale;
-        node.rotation = rotation;
+        node.matrix = mat;
     }
 
     private _updated = false;

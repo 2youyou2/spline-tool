@@ -1,4 +1,4 @@
-import { EDITOR } from 'cce.env';
+import { EDITOR } from 'cc/env';
 
 export function formatPath (p: string) {
     return p.replace(/\\/g, '/');

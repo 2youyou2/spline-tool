@@ -1,4 +1,4 @@
-import { EDITOR } from "cce.env";
+import { EDITOR } from 'cc/env';
 import { formatPath, path } from './npm';
 
 export const Editor = EDITOR && (window as any).Editor;
