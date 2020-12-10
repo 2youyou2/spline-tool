@@ -1,8 +1,8 @@
-import { _decorator, Node, Prefab, Vec4, Quat, Vec3, Mat4, ModelComponent, Vec2, Mesh, instantiate, warn, mat4 } from 'cc';
+import { _decorator, Node, Prefab, Vec4, Quat, Vec3, Mat4, ModelComponent, Vec2, Mesh, instantiate, warn, mat4, TERRAIN_HEIGHT_BASE, MeshRenderer } from 'cc';
 import SourceMesh from '../../utils/mesh-processing/source-mesh';
 import FixedModelMesh from '../../utils/mesh-processing/fixed-model-mesh';
 import { ScatterType } from '../type';
-import { node2nodeLength } from '../../editor/utils';
+import meshUtility from '../../utils/mesh-processing/mesh-utility';
 
 const { ccclass, type, property } = _decorator;
 
@@ -13,6 +13,9 @@ let tempMeshTangent = new Vec4();
 let tempArray2 = new Array(2).fill(0);
 let tempArray3 = new Array(3).fill(0);
 let tempArray4 = new Array(4).fill(0);
+
+let tempMat4 = new Mat4;
+let tempMat4_2 = new Mat4;
 
 @ccclass('ScatterItem')
 export default class ScatterItem {
@@ -53,20 +56,34 @@ export default class ScatterItem {
     @property
     protected _meshStructs: Mesh.IStruct[] = [];
 
-    protected _sourceMesh: SourceMesh = null;
+    protected _sourceMesh!: SourceMesh;
+    protected _tempNode!: Node;
 
     init (node, maxCount, dataType: ScatterType) {
         this.node = node;
         this._maxCount = maxCount;
         this._type = dataType;
-        this.currentCount = 0;
 
         if (!this.prefab) return;
 
-        if (this._type === ScatterType.Mesh) {
-            this.node.removeAllChildren();
+        // reset
+        this.currentCount = 0;
+        this._sourceMesh = null;
+        this._fixedMeshes.length = 0;
+        let model = this.node.getComponent(ModelComponent);
+        if (model) {
+            model.destroy();
+        }
+        let mergeStatics = this.node.getComponent('MergeStatics');
+        if (mergeStatics) {
+            mergeStatics.destroy();
+        }
+        this.node.removeAllChildren();
 
-            let tempNode: Node = instantiate(this.prefab);
+        let tempNode: Node = this._tempNode = instantiate(this.prefab);
+
+        if (dataType === ScatterType.Mesh) {
+            tempNode = instantiate(this.prefab);
             tempNode.setPosition(0, 0, 0);
             let tempModel = tempNode.getComponent(ModelComponent) || tempNode.getComponentInChildren(ModelComponent);
             if (tempModel && tempModel.mesh) {
@@ -100,42 +117,6 @@ export default class ScatterItem {
                 node.parent = this.node;
             }
         }
-        else {
-            this.node.removeComponent(ModelComponent);
-
-            this._sourceMesh = null;
-            this._fixedMeshes.length = 0;
-        }
-    }
-
-    initWithVirtualMesh (node: Node, virtualMesh: Mesh) {
-        this.node = node;
-        let children = node.children;
-
-        let structs = this._meshStructs;
-        for (let i = 0; i < structs.length; i++) {
-            let child = children[i];
-            if (!child) {
-                warn('Can not find scatter item children ' + i);
-                continue;
-            }
-
-            let model = child.getComponent(ModelComponent);
-            let mesh = new Mesh();
-
-            if (!structs[i].minPosition) {
-                structs[i].minPosition = new Vec3;
-            }
-            if (!structs[i].maxPosition) {
-                structs[i].maxPosition = new Vec3;
-            }
-
-            mesh.reset({
-                struct: structs[i],
-                data: virtualMesh.data,
-            })
-            model.mesh = mesh;
-        }
     }
 
     shiftStructOffset (offset: number) {
@@ -152,8 +133,11 @@ export default class ScatterItem {
         if (this._type === ScatterType.Mesh) {
             this.updateMesh(mat);
         }
-        else {
+        else if (this._type === ScatterType.Instance) {
             this.updateInstance(mat);
+        }
+        else {
+            this.updateItem(mat);
         }
 
         this.currentCount++;
@@ -162,7 +146,7 @@ export default class ScatterItem {
         return true;
     }
 
-    endFill () {
+    updateFill () {
         if (!this._updated || !this.prefab) return;
 
         if (this._type === ScatterType.Mesh) {
@@ -171,16 +155,17 @@ export default class ScatterItem {
                 fixedMeshes[i].update();
             }
         }
-        else if (this._type === ScatterType.Instance) {
-            let children = this.node.children;
-            if (children.length > this.maxCount) {
-                for (let i = children.length - 1; i >= this.maxCount; i--) {
-                    children[i].parent = null;
-                }
-            }
-        }
 
         this._updated = false;
+    }
+
+    endFill () {
+        if (this._type === ScatterType.Instance) {
+            let mergeStatics: any = this.node.getComponent('MergeStatics');
+            if (mergeStatics) {
+                mergeStatics.rebuild();
+            }
+        }
     }
 
     protected updateMesh (mat: Mat4) {
@@ -215,13 +200,37 @@ export default class ScatterItem {
         }
     }
 
-    protected updateInstance (mat: Mat4) {
-        let node = this.node.children[this.currentCount];
-        if (!node) {
-            node = instantiate(this.prefab);
-            node.parent = this.node;
+    protected updateItem (mat: Mat4) {
+        let node = instantiate(this.prefab);
+        Mat4.multiply(tempMat4, node.worldMatrix, mat);
+        node.matrix = tempMat4;
+        node.parent = this.node;
+    }
+
+    protected addInstanceData (mat: Mat4, node: Node, mergeStatics: any) {
+        let mr = node.getComponent(MeshRenderer) as MeshRenderer;
+        if (mr && mr.mesh && mr.sharedMaterials.length) {
+            Mat4.multiply(tempMat4, mat, node.worldMatrix);
+            mergeStatics.addData(mr.mesh, tempMat4, mr.sharedMaterials);
         }
-        node.matrix = mat;
+
+        let children = node.children;
+        for (let i = 0; i < children.length; i++) {
+            this.addInstanceData(mat, children[i], mergeStatics);
+        }
+    }
+
+    protected updateInstance (mat: Mat4) {
+        let mergeStatics: any = this.node.getComponent('MergeStatics');
+        if (!mergeStatics) {
+            mergeStatics = this.node.addComponent('MergeStatics');
+        }
+        if (!mergeStatics || !this._tempNode) {
+            return;
+        }
+
+        Mat4.multiply(tempMat4_2, this.node.worldMatrix, mat);
+        this.addInstanceData(tempMat4_2, this._tempNode, mergeStatics);
     }
 
     private _updated = false;
