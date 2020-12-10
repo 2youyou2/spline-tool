@@ -375,11 +375,14 @@ export default class Scatter extends SplineUtilRenderer {
             }
 
             for (let i = 0; i < items.length; i++) {
-                items[i].endFill();
+                items[i].updateFill();
             }
 
             if (this._currentItemCount >= this._itemCount) {
                 // finished
+                for (let i = 0; i < items.length; i++) {
+                    items[i].endFill();
+                }
             }
         }
         else {

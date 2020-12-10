@@ -109,12 +109,12 @@ function _applyVert (meshBender: MeshBender, vert: MeshVertex, sample: CurveSamp
     vert.position.z += _alignZOffset;
     vert.position.y += _alignYOffset;
 
-    // if (meshBender.mirror === MirrorType.Y) {
-    //     vert.position.y *= -1;
-    // }
-    // else if (meshBender.mirror === MirrorType.Z) {
-    //     vert.position.z *= -1;
-    // }
+    if (meshBender.mirror === MirrorType.Y) {
+        vert.position.y *= -1;
+    }
+    else if (meshBender.mirror === MirrorType.Z) {
+        vert.position.z *= -1;
+    }
 
     vert = sample.getBent(vert, vert);
     return vert;

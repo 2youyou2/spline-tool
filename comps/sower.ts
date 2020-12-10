@@ -17,10 +17,6 @@ export default class Sower extends SplineUtilRenderer {
     @float
     _spacingRange = 0;
     @float
-    _offset = 1;
-    @float
-    _offsetRange = 0;
-    @float
     _scale = 1;
     @float
     _scaleRange = 0;
@@ -39,13 +35,6 @@ export default class Sower extends SplineUtilRenderer {
     @float
     get spacingRange () { return this._spacingRange; };
     set spacingRange (v) { this._spacingRange = v; this.dirty = true; };
-
-    @float
-    get offset () { return this._offset; };
-    set offset (v) { this._offset = v; this.dirty = true; };
-    @float
-    get offsetRange () { return this._offsetRange; };
-    set offsetRange (v) { this._offsetRange = v; this.dirty = true; };
 
     @float
     get scale () { return this._scale; };
