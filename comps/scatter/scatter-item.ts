@@ -74,9 +74,9 @@ export default class ScatterItem {
         if (model) {
             model.destroy();
         }
-        let mergeStatics = this.node.getComponent('MergeStatics');
-        if (mergeStatics) {
-            mergeStatics.destroy();
+        let instanceObject = this.node.getComponent('InstanceObject');
+        if (instanceObject) {
+            instanceObject.destroy();
         }
         this.node.removeAllChildren();
 
@@ -161,9 +161,9 @@ export default class ScatterItem {
 
     endFill () {
         if (this._type === ScatterType.Instance) {
-            let mergeStatics: any = this.node.getComponent('MergeStatics');
-            if (mergeStatics) {
-                mergeStatics.rebuild();
+            let instanceObject: any = this.node.getComponent('InstanceObject');
+            if (instanceObject) {
+                instanceObject.rebuild();
             }
         }
     }
@@ -207,30 +207,30 @@ export default class ScatterItem {
         node.parent = this.node;
     }
 
-    protected addInstanceData (mat: Mat4, node: Node, mergeStatics: any) {
+    protected addInstanceData (mat: Mat4, node: Node, instanceObject: any) {
         let mr = node.getComponent(MeshRenderer) as MeshRenderer;
         if (mr && mr.mesh && mr.sharedMaterials.length) {
             Mat4.multiply(tempMat4, mat, node.worldMatrix);
-            mergeStatics.addData(mr.mesh, tempMat4, mr.sharedMaterials);
+            instanceObject.addData(mr, tempMat4);
         }
 
         let children = node.children;
         for (let i = 0; i < children.length; i++) {
-            this.addInstanceData(mat, children[i], mergeStatics);
+            this.addInstanceData(mat, children[i], instanceObject);
         }
     }
 
     protected updateInstance (mat: Mat4) {
-        let mergeStatics: any = this.node.getComponent('MergeStatics');
-        if (!mergeStatics) {
-            mergeStatics = this.node.addComponent('MergeStatics');
+        let instanceObject: any = this.node.getComponent('InstanceObject');
+        if (!instanceObject) {
+            instanceObject = this.node.addComponent('InstanceObject');
         }
-        if (!mergeStatics || !this._tempNode) {
+        if (!instanceObject || !this._tempNode) {
             return;
         }
 
         Mat4.multiply(tempMat4_2, this.node.worldMatrix, mat);
-        this.addInstanceData(tempMat4_2, this._tempNode, mergeStatics);
+        this.addInstanceData(tempMat4_2, this._tempNode, instanceObject);
     }
 
     private _updated = false;
