@@ -1,4 +1,5 @@
 import { _decorator, Vec3, Vec2, Component } from 'cc';
+import { EDITOR } from 'cc/env';
 import Event from './utils/event';
 
 const { ccclass, property } = _decorator;
@@ -15,12 +16,12 @@ export default class SplineNode extends Component {
     /// Node position
     /// </summary>
     @property
-    _position: Vec3 = cc.v3();
+    _position: Vec3 = new Vec3();
 
     @property
     public get position () { return this._position; }
     public set position (v) {
-        if (!CC_EDITOR && this._position.equals(v)) return;
+        if (!EDITOR && this._position.equals(v)) return;
         this._position.set(v);
         // this.node.position = v;
         this.changed.invoke(this);
@@ -30,12 +31,12 @@ export default class SplineNode extends Component {
     /// Node direction
     /// </summary>
     @property
-    _direction: Vec3 = cc.v3();
+    _direction: Vec3 = new Vec3();
 
     @property
     public get direction () { return this._direction; }
     public set direction (v) {
-        if (!CC_EDITOR && this._direction.equals(v)) return;
+        if (!EDITOR && this._direction.equals(v)) return;
         this._direction.set(v);
         this.changed.invoke(this);
     }
@@ -58,7 +59,7 @@ export default class SplineNode extends Component {
     @property
     public get up () { return this._up; }
     public set up (v) {
-        if (!CC_EDITOR && this._up.equals(v)) return;
+        if (!EDITOR && this._up.equals(v)) return;
         this._up.set(v);
         this.changed.invoke(this);
     }
@@ -73,7 +74,7 @@ export default class SplineNode extends Component {
     @property
     public get scale () { return this._scale; }
     public set scale (v) {
-        if (!CC_EDITOR && this._scale.equals(v)) return;
+        if (!EDITOR && this._scale.equals(v)) return;
         this._scale.set(v);
         this.changed.invoke(this);
     }
@@ -88,7 +89,7 @@ export default class SplineNode extends Component {
     @property
     public get roll () { return this._roll; }
     public set roll (v) {
-        if (!CC_EDITOR && this._roll === v) return;
+        if (!EDITOR && this._roll === v) return;
         this._roll = v;
         this.changed.invoke(this);
     }

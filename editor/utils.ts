@@ -1,11 +1,11 @@
-import { Node, Mat4, Vec3, Color, ModelComponent, GFXPrimitiveMode, Layers } from 'cc';
+import { Node, Mat4, Vec3, Color, ModelComponent, Layers, gfx } from 'cc';
 import MeshUtility from '../utils/mesh-processing/mesh-utility';
 import { cce } from './define';
 
 let tempMat4 = new Mat4;
 let tempVec3 = new Vec3;
 
-export function createLineShape (name, color?: Color) {
+export function createLineShape (name: string, color?: Color) {
     const { createMesh, addMeshToNode, setMeshColor, AttributeName, updateVBAttr, updateIBAttr } = cce.gizmos.EngineUtils;
 
     name = name || 'Line';
@@ -19,16 +19,16 @@ export function createLineShape (name, color?: Color) {
             new Vec3(1, 1, 0),
         ],
         indices: [0, 1, 1, 2, 2, 3],
-        primitiveType: GFXPrimitiveMode.LINE_LIST
+        primitiveType: gfx.PrimitiveMode.LINE_LIST
     })
 
     let node: Node = create3DNode(name);
     addMeshToNode(node, mesh);
     setMeshColor(node, color);
 
-    let model = node.getComponent(ModelComponent);
+    let model = node.getComponent(ModelComponent)!;
 
-    let indices = [];
+    let indices: number[] = [];
     //@ts-ignore
     node.updatePoints = function (points) {
         indices.length = 0;
@@ -39,7 +39,7 @@ export function createLineShape (name, color?: Color) {
         MeshUtility.updateOrCreateModelMesh(model, {
             positions: points,
             indices,
-            primitiveType: GFXPrimitiveMode.LINE_LIST
+            primitiveType: gfx.PrimitiveMode.LINE_LIST
         })
     }
 
@@ -53,7 +53,7 @@ export function create3DNode (name: string) {
     return node;
 }
 
-export function callGizmoFunction (cb) {
+export function callGizmoFunction (cb: Function) {
     if (!cce) return;
     if (cce.gizmos) {
         cb();
@@ -88,7 +88,7 @@ export function getNodeWorldPostion (node: Node, position: Vec3, out?: Vec3, isN
 }
 export function node2nodePos (node1: Node, node2: Node, position: Vec3, out?: Vec3, isNormal = false) {
     getNodeWorldPostion(node1, position, out, isNormal);
-    getNodeLocalPostion(node2, out, out, isNormal);
+    getNodeLocalPostion(node2, out!, out, isNormal);
     return out;
 }
 export function node2nodeLength (node1: Node, node2: Node, length: number) {

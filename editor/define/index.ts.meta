@@ -1,16 +1,14 @@
 {
-  "ver": "4.0.3",
+  "ver": "4.0.22",
   "importer": "typescript",
   "imported": true,
   "uuid": "b5529d48-7042-49ae-bbe1-9b1958531653",
-  "files": [
-    ".js",
-    ".trans"
-  ],
+  "files": [],
   "subMetas": {},
   "userData": {
     "importAsPlugin": false,
     "moduleId": "project:///assets/spline/src/editor/define/index.js",
-    "importerSettings": 7
+    "importerSettings": 7,
+    "simulateGlobals": []
   }
 }

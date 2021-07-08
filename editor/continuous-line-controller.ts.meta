@@ -1,16 +1,14 @@
 {
-  "ver": "4.0.3",
+  "ver": "4.0.22",
   "importer": "typescript",
   "imported": true,
   "uuid": "c404daa0-85af-49d5-8829-651560fec1ea",
-  "files": [
-    ".js",
-    ".trans"
-  ],
+  "files": [],
   "subMetas": {},
   "userData": {
     "importAsPlugin": false,
     "moduleId": "project:///assets/spline/src/editor/continuous-line-controller.js",
-    "importerSettings": 7
+    "importerSettings": 7,
+    "simulateGlobals": []
   }
 }

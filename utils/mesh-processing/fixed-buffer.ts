@@ -1,17 +1,17 @@
-import { GFXAttributeName, GFXFormat, GFXFormatInfos, utils, IGFXAttribute } from "cc";
+import { gfx, utils } from "cc";
 
 export const builtinAttributes = {
-    position: { name: GFXAttributeName.ATTR_POSITION, format: GFXFormat.RGB32F },
-    normal: { name: GFXAttributeName.ATTR_NORMAL, format: GFXFormat.RGB32F },
-    uv: { name: GFXAttributeName.ATTR_TEX_COORD, format: GFXFormat.RG32F },
-    uv1: { name: GFXAttributeName.ATTR_TEX_COORD1, format: GFXFormat.RG32F },
-    color: { name: GFXAttributeName.ATTR_COLOR, format: GFXFormat.RGBA32F },
-    tangent: { name: GFXAttributeName.ATTR_TANGENT, format: GFXFormat.RGBA32F },
+    position: { name: gfx.AttributeName.ATTR_POSITION, format: gfx.Format.RGB32F },
+    normal: { name: gfx.AttributeName.ATTR_NORMAL, format: gfx.Format.RGB32F },
+    uv: { name: gfx.AttributeName.ATTR_TEX_COORD, format: gfx.Format.RG32F },
+    uv1: { name: gfx.AttributeName.ATTR_TEX_COORD1, format: gfx.Format.RG32F },
+    color: { name: gfx.AttributeName.ATTR_COLOR, format: gfx.Format.RGBA32F },
+    tangent: { name: gfx.AttributeName.ATTR_TANGENT, format: gfx.Format.RGBA32F },
 }
 export type AttributesKey = 'position' | 'normal' | 'uv' | 'uv1' | 'tangent' | 'color';
 
 export default class FixedBuffer {
-    static create (verticesCount, indicesCount, attributes: AttributesKey[] = ['position', 'normal', 'tangent', 'uv', 'uv1'], { arrayBuffer, arrayBufferVerticesOffset = 0, arrayBufferIndicesOffset = 0}) {
+    static create (verticesCount: number, indicesCount: number, attributes: AttributesKey[] = ['position', 'normal', 'tangent', 'uv', 'uv1'], { arrayBuffer = null as ArrayBuffer | null, arrayBufferVerticesOffset = 0, arrayBufferIndicesOffset = 0 }) {
 
         let attrs: any = {};
 
@@ -19,7 +19,7 @@ export default class FixedBuffer {
         for (let i = 0; i < attributes.length; i++) {
             let builtinAttribute = builtinAttributes[attributes[i]];
             let format = builtinAttribute.format;
-            let info = GFXFormatInfos[format];
+            let info = gfx.FormatInfos[format];
             attrs[attributes[i]] = {
                 gfxIndex: i,
                 offset: stride,
@@ -61,13 +61,13 @@ export default class FixedBuffer {
         return fixedBuffer;
     }
 
-    _buffer: ArrayBuffer = null;
-    _ibuffer: Uint8Array = null;
-    _vbuffer: Uint8Array = null;
+    _buffer: ArrayBuffer | null = null;
+    _ibuffer: Uint8Array | null = null;
+    _vbuffer: Uint8Array | null = null;
 
-    _dataView: DataView = null;
-    
-    _iView: Uint16Array = null;
+    _dataView: DataView | null = null;
+
+    _iView: Uint16Array | null = null;
 
     _attrs: any = {};
 
@@ -82,13 +82,13 @@ export default class FixedBuffer {
 
     stride = 0;
 
-    writeVertex (vertOffset, attrName, value) {
+    writeVertex (vertOffset: number, attrName: number, value: number[]) {
         let attr = this._attrs[attrName];
         let offset = this.verticesOffset + vertOffset * this.stride + attr.offset;
-        utils.writeBuffer(this._dataView, value, attr.format, offset, this.stride);
+        utils.writeBuffer(this._dataView!, value, attr.format, offset, this.stride);
     }
-    writeIndex (indexOffset, value) {
+    writeIndex (indexOffset: number, value: number) {
         let offset = this.indicesOffset + indexOffset;
-        this._iView[offset] = value;
+        this._iView![offset] = value;
     }
 }

@@ -17,7 +17,7 @@ let tempRotation = new Vec3();
 @executeInEditMode
 export default class SplineMeshTiling extends SplineUtilRenderer {
     @type(Material)
-    public _material: Material = null;
+    public _material: Material | null = null;
 
     @type(Material)
     get material () {
@@ -29,9 +29,9 @@ export default class SplineMeshTiling extends SplineUtilRenderer {
     }
 
     @type(Mesh)
-    public _mesh: Mesh = null;
+    public _mesh: Mesh | null = null;
     @type(Mesh)
-    get mesh (): Mesh {
+    get mesh () {
         return this._mesh;
     }
     set mesh (value) {
@@ -132,7 +132,7 @@ export default class SplineMeshTiling extends SplineUtilRenderer {
         this._offsetValueType = value;
         this.onCurveChanged();
     }
-    
+
     @type(CurveRange)
     _widthCurve: CurveRange = UAnimationCurve.one();
     @type(CurveRange)
@@ -250,9 +250,9 @@ export default class SplineMeshTiling extends SplineUtilRenderer {
             if (this.curveSpace) {
                 let curves = this.spline.curves;
                 for (let i = 0; i < curves.length; i++) {
-                    this._getOrcreate(used++, curves[ i ]);
+                    this._getOrcreate(used++, curves[i]);
                     if (this.mirror !== MirrorType.None) {
-                        this._getOrcreate(used++, curves[ i ], this.mirror);
+                        this._getOrcreate(used++, curves[i], this.mirror);
                     }
                 }
             } else {
@@ -272,7 +272,7 @@ export default class SplineMeshTiling extends SplineUtilRenderer {
 
         if (children.length > used) {
             for (let i = children.length - 1; i >= used; i--) {
-                children[ i ].parent = null;
+                children[i].parent = null;
             }
         }
     }
@@ -280,7 +280,7 @@ export default class SplineMeshTiling extends SplineUtilRenderer {
     private _updateMaterials () {
         let children = this.generated.children;
         for (let i = 0; i < children.length; i++) {
-            let mc = children[ i ].getComponent(ModelComponent);
+            let mc = children[i].getComponent(ModelComponent)!;
             mc.material = this.material;
         }
     }
@@ -288,13 +288,13 @@ export default class SplineMeshTiling extends SplineUtilRenderer {
     private _updateMode () {
         let children = this.generated.children;
         for (let i = 0; i < children.length; i++) {
-            let mb = children[ i ].getComponent(MeshBender);
+            let mb = children[i].getComponent(MeshBender)!;
             mb.mode = this.mode;
         }
     }
 
-    private _getOrcreate (childIdx, target: ISplineCruve, mirror = MirrorType.None) {
-        let node: Node = this.generated.children[ childIdx ];
+    private _getOrcreate (childIdx: number, target: ISplineCruve, mirror = MirrorType.None) {
+        let node: Node = this.generated.children[childIdx];
         if (!node) {
             node = new Node();
             node.parent = this.generated;
@@ -314,7 +314,7 @@ export default class SplineMeshTiling extends SplineUtilRenderer {
         let rotation = this.rotation;
         let alignOffset = this.alignOffset;
 
-        mb.source = SourceMesh.build(this.mesh)
+        mb.source = SourceMesh.build(this.mesh!)
             .translate(translation)
             .rotate(Quat.fromEuler(new Quat(), rotation.x, rotation.y, rotation.z))
             .scaleRes(this.scale);

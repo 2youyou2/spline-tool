@@ -1,5 +1,5 @@
 import FixedBuffer, { AttributesKey, builtinAttributes } from "./fixed-buffer";
-import { Mesh, GFXFormatInfos, GFXPrimitiveMode, IGFXAttribute, utils, ModelComponent, Vec3, gfx } from "cc";
+import { Mesh, utils, ModelComponent, Vec3, gfx } from "cc";
 
 const MAX_VERTICES_COUNT = 65535;
 
@@ -23,7 +23,7 @@ export default class FixedModelMesh {
                 format: format
             };
 
-            let info = GFXFormatInfos[format];
+            let info = gfx.FormatInfos[format];
             stride += info.size;
         }
 
@@ -81,7 +81,7 @@ export default class FixedModelMesh {
             meshStruct.vertexBundles.push(vertexBundle)
 
             const primitive: Mesh.ISubMesh = {
-                primitiveMode: GFXPrimitiveMode.TRIANGLE_LIST,
+                primitiveMode: gfx.PrimitiveMode.TRIANGLE_LIST,
                 vertexBundelIndices: [i],
                 indexView: {
                     offset: buffers[i].indicesOffset,
@@ -105,39 +105,39 @@ export default class FixedModelMesh {
         return fixedModelMesh;
     }
 
-    mesh: Mesh = null;
-    modelComp: ModelComponent = null;
+    mesh: Mesh | null = null;
+    modelComp: ModelComponent | null = null;
 
     maxBatchVerticesCount = 0;
 
     _buffers: FixedBuffer[] = [];
 
-    _dataView: DataView = null;
-    _iView: Uint16Array = null;
+    _dataView: DataView | null = null;
+    _iView: Uint16Array | null = null;
 
     _attrs: any = {};
     _stride = 0;
 
-    writeVertex (vertOffset, attrName, value) {
+    writeVertex (vertOffset: number, attrName: string, value: number[]) {
         let attr = this._attrs[attrName];
         let offset = vertOffset * this._stride + attr.offset;
-        utils.writeBuffer(this._dataView, value, attr.format, offset, this._stride);
+        utils.writeBuffer(this._dataView!, value, attr.format, offset, this._stride);
     }
-    writeIndex (indexOffset, value) {
+    writeIndex (indexOffset: number, value: number) {
         value = value % this.maxBatchVerticesCount;
-        this._iView[indexOffset] = value;
+        this._iView![indexOffset] = value;
     }
     update () {
-        let modelComp = this.modelComp;
-        let subMeshes = this.mesh.renderingSubMeshes;
+        let modelComp = this.modelComp!;
+        let subMeshes = this.mesh!.renderingSubMeshes;
         for (let i = 0; i < subMeshes.length; i++) {
             let subMesh = subMeshes[i];
             let fixedBuffer = this._buffers[i];
 
             let vb = subMesh.vertexBuffers[0];
-            vb.update(fixedBuffer._vbuffer);
-            let ib = subMesh.indexBuffer;
-            ib.update(fixedBuffer._ibuffer);
+            vb.update(fixedBuffer._vbuffer!);
+            let ib = subMesh.indexBuffer!;
+            ib.update(fixedBuffer._ibuffer!);
 
             let model = modelComp.model && modelComp.model.subModels[i];
             if (model) {

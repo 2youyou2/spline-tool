@@ -6,6 +6,7 @@ import CurveSample from './curve-sample';
 import Event from './utils/event';
 import Mathf from './utils/mathf';
 import pool from './utils/pool';
+import { EDITOR } from 'cc/env';
 
 const STEP_COUNT = 30;
 const T_STEP = 1.0 / STEP_COUNT;
@@ -159,7 +160,7 @@ export default class CubicBezierCurve {
 
         this._points.length = 0;
 
-        if (!CC_EDITOR || !this._gizmoEditing) {
+        if (!EDITOR || !this._gizmoEditing) {
             this.changed.invoke();
         }
     }
@@ -229,7 +230,7 @@ export default class CubicBezierCurve {
 
 
     _points: Vec3[] = [];
-    getPoints () : Vec3[] {
+    getPoints (): Vec3[] {
         if (this._points.length === 0) {
             this._caclBoundingBox();
         }

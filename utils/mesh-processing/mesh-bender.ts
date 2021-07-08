@@ -1,4 +1,4 @@
-import { Component, Mesh, GFXAttributeName, Vec2, ModelComponent, _decorator, Enum, Vec3, CurveRange, repeat, clamp, Color } from 'cc';
+import { Component, Mesh, Vec2, ModelComponent, _decorator, Enum, CurveRange, clamp, Color, log } from 'cc';
 import Spline from '../../spline';
 import CubicBezierCurve from '../../cubic-bezier-curve';
 import CurveSample from '../../curve-sample';
@@ -63,7 +63,7 @@ let _tempYOffset = 0;
 let _alignZOffset = 0;
 let _alignYOffset = 0;
 function _beginFill (meshBender: MeshBender) {
-    let source = meshBender.source;
+    let source = meshBender.source!;
     _tempZOffset = 0;
     _tempYOffset = 0;
     _alignZOffset = 0;
@@ -93,7 +93,7 @@ function _beginFill (meshBender: MeshBender) {
     _tempHeightRange.set(source.minY + meshBender.heightRange.x * source.lengthY, source.minY + meshBender.heightRange.y * source.lengthY);
 }
 
-function _applyVert (meshBender: MeshBender, vert: MeshVertex, sample: CurveSample, distanceRatio) {
+function _applyVert (meshBender: MeshBender, vert: MeshVertex, sample: CurveSample, distanceRatio: number) {
     vert = MeshVertex.pool.get().set(vert);
     vert.position.z = clamp(vert.position.z, _tempWidthRange.x, _tempWidthRange.y);
     vert.position.y = clamp(vert.position.y, _tempHeightRange.x, _tempHeightRange.y);
@@ -101,10 +101,10 @@ function _applyVert (meshBender: MeshBender, vert: MeshVertex, sample: CurveSamp
     vert.position.z += _tempZOffset;
     vert.position.y += _tempYOffset;
     if (meshBender.widthCurve) {
-        vert.position.z *= meshBender.widthCurve.evaluate(distanceRatio, 0.5);
+        vert.position.z *= meshBender.widthCurve.evaluate(distanceRatio, 0.5)!;
     }
     if (meshBender.heightCurve) {
-        vert.position.y *= meshBender.heightCurve.evaluate(distanceRatio, 0.5);
+        vert.position.y *= meshBender.heightCurve.evaluate(distanceRatio, 0.5)!;
     }
     vert.position.z += _alignZOffset;
     vert.position.y += _alignYOffset;
@@ -136,18 +136,17 @@ function _endFill (meshBender: MeshBender, bentVertices: MeshVertex[], sampleCac
         colors = (vertexFlags & MeshVertexFlags.Color) && bentVertices.map(b => b.color);
     }
 
-    let forceRecreate = vertexFlags !== meshBender._vertexFlags;
     meshBender._vertexFlags = vertexFlags;
 
-    MeshUtility.updateOrCreateModelMesh(meshBender.getComponent(ModelComponent), {
+    MeshUtility.updateOrCreateModelMesh(meshBender.getComponent(ModelComponent)!, {
         positions: (vertexFlags & MeshVertexFlags.Position) && bentVertices.map(b => b.position),
         normals: (vertexFlags & MeshVertexFlags.Normal) && bentVertices.map(b => b.normal),
         tangents: (vertexFlags & MeshVertexFlags.Tangent) && bentVertices.map(b => b.tangent),
         uvs: (vertexFlags & MeshVertexFlags.UV) && bentVertices.map(b => b.uv),
         uv1s: (vertexFlags & MeshVertexFlags.UV1) && bentVertices.map(b => b.uv1),
         colors,
-        indices: triangles || meshBender.source.triangles
-    }, forceRecreate);
+        indices: triangles || meshBender.source!.triangles
+    });
 
     for (let i = 0; i < bentVertices.length; i++) {
         MeshVertex.pool.put(bentVertices[i]);
@@ -162,17 +161,17 @@ function _endFill (meshBender: MeshBender, bentVertices: MeshVertex[], sampleCac
 @executeInEditMode
 export default class MeshBender extends Component {
     private dirty = false;
-    private result: Mesh;
-    private useSpline: boolean;
-    private spline: Spline;
-    private intervalStart
-    private intervalEnd;
-    private curve: CubicBezierCurve;
+    private result: Mesh | null = null;
+    private useSpline = false;
+    private spline: Spline | null = null;
+    private intervalStart = 0;
+    private intervalEnd = 0;
+    private curve: CubicBezierCurve | null = null;
     private _sampleCache: Map<string, CurveSample> = new Map();
 
     _vertexFlags = 0;
 
-    private _source: SourceMesh;
+    private _source: SourceMesh | null = null;
     /// <summary>
     /// The source mesh to bend.
     /// </summary>
@@ -239,10 +238,10 @@ export default class MeshBender extends Component {
 
     get length () {
         if (this.useSpline) {
-            return this.spline.length;
+            return this.spline!.length;
         }
         else {
-            return this.curve.length;
+            return this.curve!.length;
         }
     }
 
@@ -257,7 +256,7 @@ export default class MeshBender extends Component {
     }
 
 
-    _widthCurve: CurveRange = null;
+    _widthCurve: CurveRange | null = null;
     get widthCurve () {
         return this._widthCurve;
     }
@@ -275,7 +274,7 @@ export default class MeshBender extends Component {
         this.dirty = true;
     }
 
-    _heightCurve: CurveRange = null;
+    _heightCurve: CurveRange | null = null;
     get heightCurve () {
         return this._heightCurve;
     }
@@ -413,7 +412,7 @@ export default class MeshBender extends Component {
     private fillOnce () {
         let sampleCache = this._sampleCache;
 
-        let source = this.source;
+        let source = this.source!;
         let bentVertices: MeshVertex[] = [];
 
         _beginFill(this);
@@ -425,21 +424,21 @@ export default class MeshBender extends Component {
             let distance = vert.position.x - source.minX + offset;
             let distanceRate = source.lengthX == 0 ? 0 : Math.abs(vert.position.x - source.minX) / source.lengthX;
             let cacheKey = '' + distance;
-            let sample: CurveSample = sampleCache.get(cacheKey);
+            let sample: CurveSample = sampleCache.get(cacheKey)!;
             if (!sample) {
                 if (!this.useSpline) {
-                    if (distance > this.curve.length) continue;
-                    sample = this.curve.getSampleAtDistance(distance, CurveSample.pool.get());
+                    if (distance > this.curve!.length) continue;
+                    sample = this.curve!.getSampleAtDistance(distance, CurveSample.pool.get());
                 } else {
                     let distOnSpline = this.intervalStart + distance;
                     //if (true) { //spline.isLoop) {
-                    while (distOnSpline > this.spline.length) {
-                        distOnSpline -= this.spline.length;
+                    while (distOnSpline > this.spline!.length) {
+                        distOnSpline -= this.spline!.length;
                     }
                     //} else if (distOnSpline > spline.Length) {
                     //    continue;
                     //}
-                    sample = this.spline.getSampleAtDistance(distOnSpline);
+                    sample = this.spline!.getSampleAtDistance(distOnSpline);
                 }
                 sampleCache.set(cacheKey, sample);
             }
@@ -452,10 +451,10 @@ export default class MeshBender extends Component {
     }
 
     private fillRepeat () {
-        let source = this.source;
+        let source = this.source!;
         let intervalLength = this.useSpline ?
-            (this.intervalEnd == 0 ? this.spline.length : this.intervalEnd) - this.intervalStart :
-            this.curve.length;
+            (this.intervalEnd == 0 ? this.spline!.length : this.intervalEnd) - this.intervalStart :
+            this.curve!.length;
         let repetitionCount = Math.floor(intervalLength / source.lengthX);
         let sampleCache = this._sampleCache;
 
@@ -480,21 +479,21 @@ export default class MeshBender extends Component {
                 let vert = sourceVertices[j];
                 let distance = vert.position.x - source.minX + offset;
                 let cacheKey = `${i}_${distance}`;
-                let sample: CurveSample = sampleCache.get(cacheKey);
+                let sample: CurveSample = sampleCache.get(cacheKey)!;
                 if (!sample) {
                     if (!this.useSpline) {
-                        if (distance > this.curve.length) continue;
-                        sample = this.curve.getSampleAtDistance(distance, CurveSample.pool.get());
+                        if (distance > this.curve!.length) continue;
+                        sample = this.curve!.getSampleAtDistance(distance, CurveSample.pool.get());
                     } else {
                         let distOnSpline = this.intervalStart + distance;
                         //if (true) { //spline.isLoop) {
-                        while (distOnSpline > this.spline.length) {
-                            distOnSpline = this.spline.length;
+                        while (distOnSpline > this.spline!.length) {
+                            distOnSpline = this.spline!.length;
                         }
                         //} else if (distOnSpline > spline.Length) {
                         //    continue;
                         //}
-                        sample = this.spline.getSampleAtDistance(distOnSpline);
+                        sample = this.spline!.getSampleAtDistance(distOnSpline);
                     }
                     sampleCache.set(cacheKey, sample);
                 }
@@ -506,27 +505,27 @@ export default class MeshBender extends Component {
         }
 
         // fill remaining length
-        let remainingLength = (this.useSpline ? this.spline.length : this.curve.length) - offset;
+        let remainingLength = (this.useSpline ? this.spline!.length : this.curve!.length) - offset;
         for (let i = 0; i < sourceVertices.length; i++) {
             let vert = sourceVertices[i];
             let distanceRate = source.lengthX == 0 ? 0 : Math.abs(vert.position.x - source.minX) / source.lengthX;
             let distance = offset + distanceRate * remainingLength;
             let cacheKey = '' + distance;
-            let sample: CurveSample = sampleCache.get(cacheKey);
+            let sample: CurveSample = sampleCache.get(cacheKey)!;
             if (!sample) {
                 if (!this.useSpline) {
-                    if (distance > this.curve.length) continue;
-                    sample = this.curve.getSampleAtDistance(distance, CurveSample.pool.get());
+                    if (distance > this.curve!.length) continue;
+                    sample = this.curve!.getSampleAtDistance(distance, CurveSample.pool.get());
                 } else {
                     let distOnSpline = this.intervalStart + distance;
                     //if (true) { //spline.isLoop) {
-                    while (distOnSpline > this.spline.length) {
-                        distOnSpline = this.spline.length;
+                    while (distOnSpline > this.spline!.length) {
+                        distOnSpline = this.spline!.length;
                     }
                     //} else if (distOnSpline > spline.Length) {
                     //    continue;
                     //}
-                    sample = this.spline.getSampleAtDistance(distOnSpline);
+                    sample = this.spline!.getSampleAtDistance(distOnSpline);
                 }
                 sampleCache.set(cacheKey, sample);
             }
@@ -541,7 +540,7 @@ export default class MeshBender extends Component {
     private fillStretch () {
 
         let bentVertices: MeshVertex[] = [];
-        let source = this.source;
+        let source = this.source!;
         let sampleCache = this._sampleCache;
 
         _beginFill(this);
@@ -551,19 +550,19 @@ export default class MeshBender extends Component {
             let vert = source.vertices[i];
             let distanceRate = source.lengthX == 0 ? 0 : Math.abs(vert.position.x - source.minX) / source.lengthX;
             let cacheKey = '' + distanceRate;
-            let sample: CurveSample = sampleCache.get(cacheKey);
+            let sample: CurveSample = sampleCache.get(cacheKey)!;
             if (!sample) {
                 if (!this.useSpline) {
-                    sample = this.curve.getSampleAtDistance(this.curve.length * distanceRate, CurveSample.pool.get());
+                    sample = this.curve!.getSampleAtDistance(this.curve!.length * distanceRate, CurveSample.pool.get());
                 } else {
-                    let intervalLength = this.intervalEnd == 0 ? this.spline.length - this.intervalStart : this.intervalEnd - this.intervalStart;
+                    let intervalLength = this.intervalEnd == 0 ? this.spline!.length - this.intervalStart : this.intervalEnd - this.intervalStart;
                     let distOnSpline = this.intervalStart + intervalLength * distanceRate;
-                    if (distOnSpline > this.spline.length) {
-                        distOnSpline = this.spline.length;
-                        cc.log("dist " + distOnSpline + " spline length " + this.spline.length + " start " + this.intervalStart);
+                    if (distOnSpline > this.spline!.length) {
+                        distOnSpline = this.spline!.length;
+                        log("dist " + distOnSpline + " spline length " + this.spline!.length + " start " + this.intervalStart);
                     }
 
-                    sample = this.spline.getSampleAtDistance(distOnSpline);
+                    sample = this.spline!.getSampleAtDistance(distOnSpline);
                 }
                 sampleCache.set(cacheKey, sample);
             }

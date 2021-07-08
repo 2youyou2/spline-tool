@@ -1,16 +1,14 @@
 {
-  "ver": "4.0.3",
+  "ver": "4.0.22",
   "importer": "typescript",
   "imported": true,
   "uuid": "33e6ec5d-1e57-40d0-b1bb-0cd9f6e73cb5",
-  "files": [
-    ".js",
-    ".trans"
-  ],
+  "files": [],
   "subMetas": {},
   "userData": {
     "importAsPlugin": false,
     "moduleId": "project:///assets/spline/src/comps/type.js",
-    "importerSettings": 7
+    "importerSettings": 7,
+    "simulateGlobals": []
   }
 }

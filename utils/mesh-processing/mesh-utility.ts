@@ -1,31 +1,31 @@
-import { Mesh, Vec3, ValueType, utils, GFXFormat, GFXFormatInfos, GFXAttributeName, ModelComponent } from 'cc';
+import { Mesh, Vec3, ValueType, utils, ModelComponent, gfx } from 'cc';
 
 const primitiveAttr = {
     positions: {
         size: 3,
-        gfxName: GFXAttributeName.ATTR_POSITION
+        gfxName: gfx.AttributeName.ATTR_POSITION
     },
     normals: {
         size: 3,
-        gfxName: GFXAttributeName.ATTR_NORMAL
+        gfxName: gfx.AttributeName.ATTR_NORMAL
     },
     uvs: {
         size: 2,
-        gfxName: GFXAttributeName.ATTR_TEX_COORD
+        gfxName: gfx.AttributeName.ATTR_TEX_COORD
     },
     tangents: {
         size: 4,
-        gfxName: GFXAttributeName.ATTR_TANGENT
+        gfxName: gfx.AttributeName.ATTR_TANGENT
     }
 }
 
 const customAttributes = {
-    tagent: { name: GFXAttributeName.ATTR_TANGENT, format: GFXFormat.RGBA32F }
+    tagent: { name: gfx.AttributeName.ATTR_TANGENT, format: gfx.Format.RGBA32F }
 }
 
 function flat (arr: any) {
     if (arr && arr[0] !== undefined && arr[0] instanceof ValueType) {
-        let ret = [];
+        let ret: number[] = [];
         for (let i = 0, l = arr.length; i < l; i++) {
             let val = arr[i];
             val.constructor.toArray(ret, val, ret.length);
@@ -35,18 +35,18 @@ function flat (arr: any) {
     return arr;
 };
 
-function getVerticesCount (primitive) {
+function getVerticesCount (primitive: any) {
     let count = Number.MAX_SAFE_INTEGER;
     for (let name in primitiveAttr) {
         if (primitive[name]) {
-            count = Math.min(primitive[name].length / primitiveAttr[name].size, count);
+            count = Math.min(primitive[name].length / (primitiveAttr as any)[name].size, count);
         }
     }
 
     return count;
 }
 
-function getIndicesCount (primitive) {
+function getIndicesCount (primitive: any) {
     if (!primitive.indices) {
         return 0;
     }
@@ -57,10 +57,10 @@ function getIndicesCount (primitive) {
 function updateMeshVB (mesh: Mesh, attr: string, newValues: [], buffer: ArrayBuffer, stride: number) {
     let attributes = mesh.struct.vertexBundles[0].attributes;
     let offset = 0;
-    let format = GFXFormat.UNKNOWN;
+    let format = gfx.Format.UNKNOWN;
     for (const a of attributes) {
         if (a.name === attr) { format = a.format; break; }
-        offset += GFXFormatInfos[a.format].size;
+        offset += gfx.FormatInfos[a.format].size;
     }
 
     utils.writeBuffer(new DataView(buffer), newValues, format, offset, stride);
@@ -105,7 +105,7 @@ export default {
     },
 
     updateMesh (modelComp: ModelComponent, primitive: any) {
-        let mesh = modelComp.mesh;
+        let mesh = modelComp.mesh!;
         primitive = Object.assign({}, primitive);
 
         // prepare data
@@ -133,7 +133,7 @@ export default {
 
             for (let name in primitiveAttr) {
                 if (primitive[name]) {
-                    updateMeshVB(mesh, primitiveAttr[name].gfxName, primitive[name], vbuffer.buffer, vb.stride);
+                    updateMeshVB(mesh, (primitiveAttr as any)[name].gfxName, primitive[name], vbuffer.buffer, vb.stride);
                 }
             }
 
@@ -142,7 +142,7 @@ export default {
         else {
             for (let name in primitiveAttr) {
                 if (primitive[name]) {
-                    updateMeshVB(mesh, primitiveAttr[name].gfxName, primitive[name], vbuffer.buffer, vb.stride);
+                    updateMeshVB(mesh, (primitiveAttr as any)[name].gfxName, primitive[name], vbuffer.buffer, vb.stride);
                 }
             }
         }
@@ -150,7 +150,7 @@ export default {
 
         // update ib
         if (!primitive.indices) return;
-        let ib = subMesh.indexBuffer;
+        let ib = subMesh.indexBuffer!;
         let newIBSize = getIndicesCount(primitive);
 
         //@ts-ignore
@@ -175,7 +175,7 @@ export default {
         // model.updateCommandBuffer();
     },
 
-    updateOrCreateModelMesh (model: ModelComponent, primitive) {
+    updateOrCreateModelMesh (model: ModelComponent, primitive: any) {
         if (!model.mesh) {
             model.mesh = this.createMesh(primitive);
         }

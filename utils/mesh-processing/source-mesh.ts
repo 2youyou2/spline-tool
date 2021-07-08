@@ -1,4 +1,4 @@
-import { Mesh, Vec3, Quat, GFXAttributeName, Vec4, Vec2 } from 'cc';
+import { Mesh, Vec3, Quat, Vec4, gfx } from 'cc';
 import MeshVertex, { MeshVertexFlags } from './mesh-vertex';
 import MeshUtility from './mesh-utility';
 import MeshTesselate from './mesh-tesselate';
@@ -166,19 +166,19 @@ export default class SourceMesh {
 
             // we transform the source mesh vertices according to rotation/translation/scale
             let vertices = this._vertices[si] = this._vertices[si] || [];
-            let positions = this._mesh.readAttribute(si, GFXAttributeName.ATTR_POSITION);
-            let normals = this._mesh.readAttribute(si, GFXAttributeName.ATTR_NORMAL);
+            let positions = this._mesh.readAttribute(si, gfx.AttributeName.ATTR_POSITION)!;
+            let normals = this._mesh.readAttribute(si, gfx.AttributeName.ATTR_NORMAL)!;
 
-            let tangents = this._mesh.readAttribute(si, GFXAttributeName.ATTR_TANGENT);
+            let tangents = this._mesh.readAttribute(si, gfx.AttributeName.ATTR_TANGENT)!;
             let hasTangents = tangents && tangents.length > 0;
 
-            let uvs = this._mesh.readAttribute(si, GFXAttributeName.ATTR_TEX_COORD);
+            let uvs = this._mesh.readAttribute(si, gfx.AttributeName.ATTR_TEX_COORD)!;
             let hasUvs = uvs && uvs.length > 0;
 
-            let uv1s = this._mesh.readAttribute(si, GFXAttributeName.ATTR_TEX_COORD1);
+            let uv1s = this._mesh.readAttribute(si, gfx.AttributeName.ATTR_TEX_COORD1)!;
             let hasUv1s = uv1s && uv1s.length > 0;
 
-            let colors = this._mesh.readAttribute(si, GFXAttributeName.ATTR_COLOR);
+            let colors = this._mesh.readAttribute(si, gfx.AttributeName.ATTR_COLOR)!;
             let hasColors = colors && colors.length > 0;
 
             let vertCount = positions.length / 3;

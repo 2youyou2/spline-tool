@@ -1,18 +1,20 @@
-import { Mesh } from "cc";
+import { AssetLibrary, Mesh } from "cc";
+import { EDITOR } from 'cc/env';
 
 let _createMesh: (filePath: string) => Promise<Mesh>;
 let _saveMesh: (filePath: string, mesh: Mesh) => Promise<Mesh>;
 
-if (CC_EDITOR && typeof BUILDER === 'undefined') {
+// @ts-ignore
+if (EDITOR && typeof (BUILDER) === 'undefined') {
 
-    const { createReadStream, createWriteStream, ensureDirSync, existsSync, readdirSync, removeSync, writeFileSync } = window.require('fs-extra');
-    const { dirname, join, parse } = window.require('path');
-    const archiver = window.require('archiver');
-    const os = window.require('os')
-    const Editor = window.require('editor')
+    const globalThisAny = globalThis as any;
+    const { createReadStream, createWriteStream, ensureDirSync, existsSync, readdirSync, removeSync, writeFileSync } = globalThisAny.require('fs-extra');
+    const { dirname, join, parse } = globalThisAny.require('path');
+    const archiver = globalThisAny.require('archiver');
+    const os = globalThisAny.require('os')
+    const Editor = globalThisAny.require('editor')
 
-    const electron = window.require('electron')
-    const projectPath = electron.remote.getGlobal('Editor').Project.path;
+    const projectPath = EDITOR && Editor.Project.path;
 
     const tmpdir = os.tmpdir();
 
@@ -21,7 +23,7 @@ if (CC_EDITOR && typeof BUILDER === 'undefined') {
             const output = createWriteStream(target);
             const archive = archiver('zip');
 
-            let data = [];
+            let data: number[] = [];
             output.on('error', (error: Error) => {
                 reject(error);
             });
@@ -31,7 +33,7 @@ if (CC_EDITOR && typeof BUILDER === 'undefined') {
                 resolve(new Uint8Array(data))
             });
 
-            archive.on('data', function (subdata) {
+            archive.on('data', function (subdata: number[]) {
                 for (let i = 0; i < subdata.length; i++) {
                     data.push(subdata[i]);
                 }
@@ -78,7 +80,7 @@ if (CC_EDITOR && typeof BUILDER === 'undefined') {
 
         const url = await Editor.Ipc.requestToPackage('asset-db', 'query-url-by-path', filePath);
 
-        let assetUid;
+        let assetUid = '';
         if (existsSync(filePath)) {
             assetUid = await Editor.Ipc.requestToPackage('asset-db', 'query-asset-uuid', url);
             await Editor.Ipc.requestToPackage('asset-db', 'save-asset', assetUid, data);
@@ -88,7 +90,7 @@ if (CC_EDITOR && typeof BUILDER === 'undefined') {
 
         return new Promise((resolve, reject) => {
             setTimeout(() => {
-                cc.AssetLibrary.loadAsset(assetUid, (err: any, asset: any) => {
+                AssetLibrary.loadAsset(assetUid, (err: any, asset: any) => {
                     if (err) {
                         return reject(err);
                     }
@@ -100,5 +102,7 @@ if (CC_EDITOR && typeof BUILDER === 'undefined') {
 
 }
 
+// @ts-ignore
 export let createMesh = _createMesh;
+// @ts-ignore
 export let saveMesh = _saveMesh;

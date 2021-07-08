@@ -33,7 +33,7 @@ function addOnce (value: MeshVertex, list: MeshVertex[]) {
 }
 
 export default {
-    tessellate (vertices, faces, divisions = 0) {
+    tessellate (vertices: MeshVertex[], faces: number[], divisions = 0) {
 
         // Add one to the number of divisions (zero represents no divisions)
         divisions += 1;
@@ -42,11 +42,11 @@ export default {
         const faces1 = [];
 
         // Add the new interpolated point to the vertices
-        const addVertex = (i0, i1, factor) => addOnce(interpolate(vertices[i0], vertices[i1], factor), vertices);
+        const addVertex = (i0: number, i1: number, factor: number) => addOnce(interpolate(vertices[i0], vertices[i1], factor), vertices);
 
         // Iterate through each of the faces
-        for (let fi = 0, fl = faces.length; fi < fl; fi+= 3) {
-            let ia = faces[fi], ib = faces[fi+1], ic = faces[fi+2];
+        for (let fi = 0, fl = faces.length; fi < fl; fi += 3) {
+            let ia = faces[fi], ib = faces[fi + 1], ic = faces[fi + 2];
 
             // Interpolate the new vertices and add them to the list returning their vertices
             const iab = addVertex(ia, ib, (1 / divisions));

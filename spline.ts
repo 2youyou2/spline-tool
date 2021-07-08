@@ -1,4 +1,4 @@
-import { Component, Node, _decorator, Vec3, find, Vec2 } from 'cc';
+import { Component, Node, _decorator, Vec3, find, Vec2, warn } from 'cc';
 
 import SplineNode from './spline-node';
 import CubicBezierCurve from './cubic-bezier-curve';
@@ -6,6 +6,7 @@ import CurveSample from './curve-sample';
 
 import Event from './utils/event';
 import SplineNodeWrapper from './spline-node-wrapper';
+import { EDITOR } from 'cc/env';
 
 const { ccclass, type, boolean, integer, float, executeInEditMode } = _decorator;
 
@@ -20,7 +21,7 @@ const SplineRootNodeName = '__spline_node_root__';
 @ccclass
 @executeInEditMode
 export default class Spline extends Component {
-    currentSelection: SplineNode = null;
+    currentSelection: SplineNode | null = null;
 
 
     private _addSplineNodeAtLast = false;
@@ -49,7 +50,7 @@ export default class Spline extends Component {
         this._addSplineNodeAfterSelection = v;
 
         if (!this.currentSelection) {
-            cc.warn('No SpineNode selected.');
+            warn('No SpineNode selected.');
             return;
         }
 
@@ -70,7 +71,7 @@ export default class Spline extends Component {
         this._deleteSelectSplineNode = v;
 
         if (!this.currentSelection) {
-            cc.warn('No SpineNode selected.');
+            warn('No SpineNode selected.');
             return;
         }
 
@@ -93,11 +94,11 @@ export default class Spline extends Component {
     }
 
     @type(SplineNodeWrapper)
-    public get splineNodes () : SplineNodeWrapper[] {
+    public get splineNodes (): SplineNodeWrapper[] {
         return this._nodes.map(node => SplineNodeWrapper.create(node));
     }
     public set splineNodes (value: SplineNodeWrapper[]) {
-        
+
     }
 
     /// <summary>
@@ -131,11 +132,11 @@ export default class Spline extends Component {
     }
 
     invokeNodeListChanged () {
-        if (CC_EDITOR && this._gizmoEditing) return;
+        if (EDITOR && this._gizmoEditing) return;
         this.nodeListChanged.invoke();
     }
     invokeCurveChanged () {
-        if (CC_EDITOR && this._gizmoEditing) return;
+        if (EDITOR && this._gizmoEditing) return;
         this.curveChanged.invoke();
     }
 
@@ -181,7 +182,7 @@ export default class Spline extends Component {
         splineNode.position = pos;
         splineNode.direction = direction;
 
-        this._nodeRoot.insertChild(node, index);
+        this._nodeRoot!.insertChild(node, index);
         this._nodes.splice(index, 0, splineNode);
 
         if (!this._updatingNodes) {
@@ -194,7 +195,7 @@ export default class Spline extends Component {
 
     removeNode (index: number) {
         let splineNode = this._nodes[index];
-        this._nodeRoot.removeChild(splineNode.node);
+        this._nodeRoot!.removeChild(splineNode.node);
         this._nodes.splice(index, 1);
 
         if (!this._updatingNodes) {
@@ -206,7 +207,7 @@ export default class Spline extends Component {
     }
 
 
-    _nodeRoot: Node;
+    _nodeRoot: Node | null = null;
     _updatingNodes = false;
     _updateNodes (autoCreate = true) {
         this._updatingNodes = true;
@@ -225,8 +226,8 @@ export default class Spline extends Component {
                 }
             }
             else if (autoCreate) {
-                this.addNode(cc.v3(-5, 0, 0), cc.v3(-5, 0, -3));
-                this.addNode(cc.v3(5, 0, 0), cc.v3(5, 0, 3));
+                this.addNode(new Vec3(-5, 0, 0), new Vec3(-5, 0, -3));
+                this.addNode(new Vec3(5, 0, 0), new Vec3(5, 0, 3));
             }
 
             nodeRoot.parent = this.node;
@@ -325,8 +326,8 @@ export default class Spline extends Component {
         throw new Error("Something went wrong with GetSampleAtDistance.");
     }
 
-    private startNode: SplineNode;
-    private endNode: SplineNode;
+    private startNode: SplineNode | null = null;
+    private endNode: SplineNode | null = null;
     private updateLoopBinding () {
         if (this.startNode) {
             this.startNode.changed.removeListener(this.startNodeChanged);
@@ -348,24 +349,28 @@ export default class Spline extends Component {
 
     private startNodeChanged () {
         let start = this.startNode, end = this.endNode;
-        end.changed.removeListener(this.endNodeChanged);
-        end.position = start.position;
-        end.direction = start.direction;
-        end.roll = start.roll;
-        end.scale = start.scale;
-        end.up = start.up;
-        end.changed.addListener(this.endNodeChanged);
+        if (start && end) {
+            end.changed.removeListener(this.endNodeChanged);
+            end.position = start.position;
+            end.direction = start.direction;
+            end.roll = start.roll;
+            end.scale = start.scale;
+            end.up = start.up;
+            end.changed.addListener(this.endNodeChanged);
+        }
     }
 
     private endNodeChanged () {
         let start = this.startNode, end = this.endNode;
-        start.changed.removeListener(this.startNodeChanged);
-        start.position = end.position;
-        start.direction = end.direction;
-        start.roll = end.roll;
-        start.scale = end.scale;
-        start.up = end.up;
-        start.changed.addListener(this.startNodeChanged);
+        if (start && end) {
+            start.changed.removeListener(this.startNodeChanged);
+            start.position = end.position;
+            start.direction = end.direction;
+            start.roll = end.roll;
+            start.scale = end.scale;
+            start.up = end.up;
+            start.changed.addListener(this.startNodeChanged);
+        }
     }
 
     _samples: CurveSample[] = [];

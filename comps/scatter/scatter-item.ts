@@ -20,7 +20,7 @@ let tempMat4_2 = new Mat4;
 @ccclass('ScatterItem')
 export default class ScatterItem {
     @type(Prefab)
-    _prefab: Prefab = null;
+    _prefab: Prefab | null = null;
     @property
     _type = ScatterType.Instance;
     @property
@@ -56,10 +56,10 @@ export default class ScatterItem {
     @property
     protected _meshStructs: Mesh.IStruct[] = [];
 
-    protected _sourceMesh!: SourceMesh;
+    protected _sourceMesh: SourceMesh | null = null;
     protected _tempNode!: Node;
 
-    init (node, maxCount, dataType: ScatterType) {
+    init (node: Node, maxCount: number, dataType: ScatterType) {
         this.node = node;
         this._maxCount = maxCount;
         this._type = dataType;
@@ -85,7 +85,7 @@ export default class ScatterItem {
         if (dataType === ScatterType.Mesh) {
             tempNode = instantiate(this.prefab);
             tempNode.setPosition(0, 0, 0);
-            let tempModel = tempNode.getComponent(ModelComponent) || tempNode.getComponentInChildren(ModelComponent);
+            let tempModel = tempNode.getComponent(ModelComponent)! || tempNode.getComponentInChildren(ModelComponent)!;
             if (tempModel && tempModel.mesh) {
                 this._sourceMesh = SourceMesh.build(tempModel.mesh);
                 tempModel.node.getWorldRotation(this._sourceMesh.rotation)
@@ -95,20 +95,20 @@ export default class ScatterItem {
             }
 
             let tempMaterials = tempModel && tempModel.sharedMaterials;
-            let subMeshCount = this._sourceMesh.subCount();
+            let subMeshCount = this._sourceMesh!.subCount();
 
             this._fixedMeshes.length = 0;
             this._meshStructs.length = 0;
             for (let i = 0; i < subMeshCount; i++) {
                 let node = new Node('ScatterItemModel');
                 let model = node.addComponent(ModelComponent);
-                this._fixedMeshes[i] = FixedModelMesh.create(this._sourceMesh.getVertices(i).length, this._sourceMesh.getTriangles(i).length, model, this.maxCount);
-                this._meshStructs[i] = this._fixedMeshes[i].mesh.struct;
+                this._fixedMeshes[i] = FixedModelMesh.create(this._sourceMesh!.getVertices(i).length, this._sourceMesh!.getTriangles(i).length, model, this.maxCount);
+                this._meshStructs[i] = this._fixedMeshes[i].mesh!.struct;
                 model.mesh = this._fixedMeshes[i].mesh;
                 model.shadowCastingMode = tempModel.shadowCastingMode;
                 model.lightmapSettings = tempModel.lightmapSettings;
 
-                let renderingSubMeshes = model.mesh.renderingSubMeshes;
+                let renderingSubMeshes = model.mesh!.renderingSubMeshes;
                 let material = tempMaterials[i] || tempMaterials[0];
                 for (let j = 0; j < renderingSubMeshes.length; j++) {
                     model.setMaterial(material, j);
@@ -122,7 +122,7 @@ export default class ScatterItem {
     shiftStructOffset (offset: number) {
         let structs = this._meshStructs;
         for (let i = 0; i < structs.length; i++) {
-            structs[i].primitives.forEach(primitive => primitive.indexView.offset += offset);
+            structs[i].primitives.forEach(primitive => primitive.indexView!.offset += offset);
             structs[i].vertexBundles.forEach(vertex => vertex.view.offset += offset);
         }
     }
@@ -161,7 +161,7 @@ export default class ScatterItem {
 
     endFill () {
         if (this._type === ScatterType.Instance) {
-            let instanceObject: any = this.node.getComponent('InstanceObject');
+            let instanceObject: any = this.node!.getComponent('InstanceObject');
             if (instanceObject) {
                 instanceObject.rebuild();
             }
@@ -201,7 +201,7 @@ export default class ScatterItem {
     }
 
     protected updateItem (mat: Mat4) {
-        let node = instantiate(this.prefab);
+        let node: Node = instantiate(this.prefab)! as any;
         Mat4.multiply(tempMat4, node.worldMatrix, mat);
         node.matrix = tempMat4;
         node.parent = this.node;
@@ -221,15 +221,15 @@ export default class ScatterItem {
     }
 
     protected updateInstance (mat: Mat4) {
-        let instanceObject: any = this.node.getComponent('InstanceObject');
+        let instanceObject: any = this.node!.getComponent('InstanceObject');
         if (!instanceObject) {
-            instanceObject = this.node.addComponent('InstanceObject');
+            instanceObject = this.node!.addComponent('InstanceObject');
         }
         if (!instanceObject || !this._tempNode) {
             return;
         }
 
-        Mat4.multiply(tempMat4_2, this.node.worldMatrix, mat);
+        Mat4.multiply(tempMat4_2, this.node!.worldMatrix, mat);
         this.addInstanceData(tempMat4_2, this._tempNode, instanceObject);
     }
 
@@ -237,5 +237,5 @@ export default class ScatterItem {
 
     currentCount = 0;
 
-    private node: Node = null;
+    private node: Node | null = null;
 }

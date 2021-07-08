@@ -1,4 +1,4 @@
-import { _decorator, Node, Prefab, isPropertyModifier, Vec4, Quat, Vec3, geometry, randomRange, Mat4, Layers, Terrain, Mesh, director, find, js, CCObject, mat4 } from 'cc';
+import { _decorator, Node, Quat, Vec3, geometry, randomRange, Mat4, Layers, Terrain, director, find, js, CCObject, mat4 } from 'cc';
 import SplineUtilRenderer from './../spline-util-renderer';
 import raycast from '../../utils/raycast';
 import { ScatterVolume } from './scatter-volume';
@@ -34,7 +34,7 @@ class StoredScatterData {
     @type(Mat4)
     matrix = new Mat4;
 
-    constructor (itemIndex, matrix) {
+    constructor (itemIndex: number, matrix: Mat4) {
         this.itemIndex = itemIndex;
         this.matrix.set(matrix);
     }
@@ -85,9 +85,9 @@ export default class Scatter extends SplineUtilRenderer {
 
     // racast layer
     @type(Node)
-    _raycastLayer: Node = null;
+    _raycastLayer: Node | null = null;
     @type(Terrain)
-    _raycastTerrain: Terrain = null;
+    _raycastTerrain: Terrain | null = null;
     @type(Node)
     set raycastLayer (l) {
         this._raycastLayer = l;
@@ -102,7 +102,7 @@ export default class Scatter extends SplineUtilRenderer {
         return this._raycastLayer;
     }
 
-    protected _onDirtyChanged (value) {
+    protected _onDirtyChanged (value: boolean) {
         if (value) {
             this._storedDatas.length = 0;
             this._updateVolume();
@@ -202,7 +202,7 @@ export default class Scatter extends SplineUtilRenderer {
     @property
     _storedDatas: StoredScatterData[] = [];
 
-    private _isPosValid (pos) {
+    private _isPosValid (pos: Vec3) {
         let pointIn = false;
         if (this._type === VolumeType.Line) {
             let dist = pointPolygonMinDistXZ(pos, this.spline.getPoints()).dist;
@@ -312,7 +312,7 @@ export default class Scatter extends SplineUtilRenderer {
             if (this._raycastLayer) {
                 layer = this._raycastLayer.layer;
             }
-            let results = raycast.raycastAllModels(director.getScene()._renderScene, tempRay, layer);
+            let results = raycast.raycastAllModels(director.getScene()!._renderScene!, tempRay, layer);
             if (results.length > 0) {
                 randomPos = randomPos;
                 Vec3.scaleAndAdd(randomPos, tempRay.o, tempRay.d, results[0].distance);
@@ -459,7 +459,7 @@ export default class Scatter extends SplineUtilRenderer {
     protected get generated () {
         if (!this._generated || this._generated.parent !== this.node) {
             let generatedName = 'generated ' + js.getClassName(this);
-            this._generated = find(generatedName, this.node);
+            this._generated = find(generatedName, this.node)!;
             if (!this._generated) {
                 this._generated = new Node(generatedName);
                 if (!this._showGenerated) {

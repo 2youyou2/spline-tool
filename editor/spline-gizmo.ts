@@ -6,14 +6,15 @@ import ContinuousLineController from './continuous-line-controller';
 import pool from '../utils/pool';
 import SplineNode from '../spline-node';
 import Spline from '../spline';
-import { Component, AnimationComponent, Node, Vec3, warn } from 'cc';
+import { Node, Vec3, warn } from 'cc';
 import { SplineMoveType } from './types';
 import { cce } from './define';
+import { EDITOR } from 'cc/env';
 
-if (CC_EDITOR) {
+if (EDITOR) {
 
-    function findComponentInParent (node: Node, ctor) {
-        let parent: Node = node;
+    function findComponentInParent (node: Node, ctor: any) {
+        let parent: Node | null = node;
         while (parent) {
             let comp = parent.getComponent(ctor);
             if (comp) return comp;
@@ -26,14 +27,14 @@ if (CC_EDITOR) {
     let tempVec3 = new Vec3
 
     class SplineGizmo extends Gizmo {
-        moveTarget = null;
+        moveTarget: SplineNode | Node | null = null;
         moveType: SplineMoveType = SplineMoveType.None;
 
         splineNodeControllers: SplineNodeController[] = [];
-        moveController = null;
-        splineLineController = null;
+        moveController: any = null;
+        splineLineController: ContinuousLineController | null = null;
 
-        currentSplineNodeController = null;
+        currentSplineNodeController: SplineNodeController | null = null;
 
         init () {
             this.moveController = this.createMoveController();
@@ -107,7 +108,7 @@ if (CC_EDITOR) {
                 }
             }
 
-            this.splineLineController.updatePoints(positions);
+            this.splineLineController!.updatePoints(positions);
 
             for (let i = 0; i < positions.length; i++) {
                 pool.Vec3.put(positions[i]);
@@ -115,6 +116,10 @@ if (CC_EDITOR) {
         }
 
         onShow () {
+            if (this._isMoving) {
+                return;
+            }
+
             let node = this.spline.node;
             let splineNodes = this.splineNodes;
             let splineNodeControllers = this.splineNodeControllers;
@@ -129,8 +134,8 @@ if (CC_EDITOR) {
             }
 
 
-            this.splineLineController.show();
-            this.moveController.hide();
+            this.splineLineController!.show();
+            this.moveController!.hide();
             this.updateControllerTransform();
 
             this.spline.nodeListChanged.addListener(this.onSplineNodesUpdate);
@@ -155,13 +160,17 @@ if (CC_EDITOR) {
         }
 
         onHide () {
+            if (this._isMoving) {
+                return;
+            }
+
             let splineNodeControllers = this.splineNodeControllers;
             for (let i = 0; i < splineNodeControllers.length; i++) {
                 splineNodeControllers[i].hide();
             }
 
             this.moveController.hide();
-            this.splineLineController.hide();
+            this.splineLineController!.hide();
 
             if (!this.currentSelectionIsSpline) {
                 this.showTransformGizmo(true);
@@ -185,20 +194,22 @@ if (CC_EDITOR) {
                 this.moveController.setPosition(this.spline.node.getWorldPosition(tempVec3));
             }
             else {
-                if (!this.currentSplineNodeController) return;
-                if (this.moveType === SplineMoveType.Position) {
-                    this.moveController.setPosition(this.currentSplineNodeController.getSplineNodeWorldPosition());
+                if (this.currentSplineNodeController) {
+                    if (this.moveType === SplineMoveType.Position) {
+                        this.moveController.setPosition(this.currentSplineNodeController.getSplineNodeWorldPosition());
+                    }
+                    else if (this.moveType === SplineMoveType.Direction) {
+                        this.moveController.setPosition(this.currentSplineNodeController.getSplineNodeWorldDirection());
+                    }
+                    else if (this.moveType === SplineMoveType.InvDirection) {
+                        this.moveController.setPosition(this.currentSplineNodeController.getSplineNodeWorldInvDirection());
+                    }
                 }
-                else if (this.moveType === SplineMoveType.Direction) {
-                    this.moveController.setPosition(this.currentSplineNodeController.getSplineNodeWorldDirection());
-                }
-                else if (this.moveType === SplineMoveType.InvDirection) {
-                    this.moveController.setPosition(this.currentSplineNodeController.getSplineNodeWorldInvDirection());
-                }
+
             }
         }
 
-        selectIndex (index, moveType: SplineMoveType) {
+        selectIndex (index: number, moveType: SplineMoveType) {
             if (this.currentSplineNodeController) {
                 this.currentSplineNodeController.hideDirection();
                 this.currentSplineNodeController = null;
@@ -234,7 +245,7 @@ if (CC_EDITOR) {
             this.updateMoveControllderPos();
         }
 
-        createSplineNodeController (index) {
+        createSplineNodeController (index: number) {
             let controller = new SplineNodeController(this.getGizmoRoot());
 
             controller.onControllerMouseDown = (event) => {
@@ -250,6 +261,7 @@ if (CC_EDITOR) {
             return controller;
         }
 
+        _isMoving = false;
         createMoveController () {
             let controller = new cce.gizmos.PositionController(this.getGizmoRoot());
             controller.onControllerMouseDown = () => {
@@ -257,17 +269,20 @@ if (CC_EDITOR) {
             };
             controller.onControllerMouseMove = () => {
                 if (controller.updated) {
+                    this._isMoving = true;
+
                     this.recordChanges();
 
                     let curNodePos = controller.getPosition();
 
                     let node = this.spline.node;
-                    let splineNode = this.moveTarget;
 
                     if (this.moveType === SplineMoveType.Node) {
                         node.setWorldPosition(curNodePos);
                     }
                     else {
+                        let splineNode = this.moveTarget! as SplineNode;
+
                         let newPos = getNodeLocalPostion(node, curNodePos);
 
                         if (this.moveType === SplineMoveType.Position) {
@@ -292,6 +307,8 @@ if (CC_EDITOR) {
                 }
             };
             controller.onControllerMouseUp = () => {
+                this._isMoving = false;
+
                 this.spline.gizmoEditing = false;
 
                 if (controller.updated) {

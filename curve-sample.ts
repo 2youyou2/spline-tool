@@ -1,10 +1,10 @@
-import { Vec3, Vec2, Quat, ToneMapFlow } from 'cc';
+import { Vec3, Vec2, Quat } from 'cc';
 
 import mathf from './utils/mathf';
 import MeshVertex from './utils/mesh-processing/mesh-vertex';
 import pool, { Pool } from './utils/pool';
 
-const front = cc.v3(0, 0, 1);
+const front = new Vec3(0, 0, 1);
 const RAD = Math.PI / 180;
 
 const RESET_QUAT = Quat.fromEuler(new Quat, 0, -90, 0);
@@ -22,11 +22,11 @@ export default class CurveSample {
     public tangent: Vec3 = new Vec3;
     public up: Vec3 = new Vec3;
     public scale: Vec2 = new Vec2;
-    public roll: number;
-    public distanceInCurve: number;
-    public timeInCurve: number;
+    public roll = 0;
+    public distanceInCurve = 0;
+    public timeInCurve = 0;
 
-    private _transformedUp: Vec3;
+    private _transformedUp: Vec3 | null = null;
     get transformedUp () {
         if (!this._transformedUp) {
             let axisQuat = pool.Quat.get();
@@ -46,7 +46,7 @@ export default class CurveSample {
     /// <summary>
     /// Rotation is a look-at quaternion calculated from the tangent, roll and up vector. Mixing non zero roll and custom up vector is not advised.
     /// </summary>
-    private _rotation: Quat;
+    private _rotation: Quat | null = null;
     get rotation () {
         if (!this._rotation) {
             this._rotation = Quat.fromViewUp(new Quat(), this.tangent, this.transformedUp);
@@ -54,7 +54,7 @@ export default class CurveSample {
         return this._rotation;
     }
 
-    private _bentRotation: Quat;
+    private _bentRotation: Quat | null = null;
     get bentRotation () {
         if (!this._bentRotation) {
             let tangent = pool.Vec3.get();

@@ -4,13 +4,16 @@ import SplineNode from "./spline-node";
 const { ccclass, property, type } = _decorator;
 @ccclass('SplineNodeWrapper')
 export default class SplineNodeWrapper {
-    static create (node) {
+    static create (node: SplineNode) {
+        if (!node) {
+            debugger;
+        }
         let wrapper = new SplineNodeWrapper();
         wrapper.node = node;
         return wrapper;
     }
 
-    node: SplineNode = null;
+    node: SplineNode | null = null;
 
     @type(SplineNode)
     get splineNode () {
@@ -19,33 +22,53 @@ export default class SplineNodeWrapper {
 
     @type(Vec3)
     get position () {
+        if (!this.node) {
+            return Vec3.ZERO;
+        }
         return this.node.position;
     }
     set position (value) {
-        this.node.position = value;
+        if (this.node) {
+            this.node.position = value;
+        }
     }
 
     @type(Vec3)
     get direction () {
+        if (!this.node) {
+            return Vec3.ZERO;
+        }
         return this.node.direction;
     }
     set direction (value) {
-        this.node.direction = value;
+        if (this.node) {
+            this.node.direction = value;
+        }
     }
 
     @type(Vec2)
     get scale () {
+        if (!this.node) {
+            return Vec2.ONE;
+        }
         return this.node.scale;
     }
     set scale (value) {
-        this.node.scale = value;
+        if (this.node) {
+            this.node.scale = value;
+        }
     }
 
     @property
     get roll () {
+        if (!this.node) {
+            return 0;
+        }
         return this.node.roll;
     }
     set roll (value) {
-        this.node.roll = value;
+        if (this.node) {
+            this.node.roll = value;
+        }
     }
-} 
+}
