@@ -1,9 +1,9 @@
-import { geometry, Layers, renderer, Mat4, Vec3, GFXPrimitiveMode, Node } from 'cc'
+import { geometry, Layers, renderer, Mat4, Vec3, Node, RenderingSubMesh, gfx } from 'cc'
 const { intersect, Ray, Triangle } = geometry;
 
 type IBArray = Uint8Array | Uint16Array | Uint32Array;
 
-let resultModels = [];
+let resultModels: { node: Node, distance: number }[] = [];
 let m4 = new Mat4;
 let modelRay = new Ray();
 let tri = Triangle.create();
@@ -11,9 +11,9 @@ let v3 = new Vec3();
 
 let narrowDis = Infinity;
 
-const narrowphase = (vb: Float32Array, ib: IBArray, pm: GFXPrimitiveMode, sides: boolean, distance = Infinity) => {
+const narrowphase = (vb: Float32Array, ib: IBArray, pm: gfx.PrimitiveMode, sides: boolean, distance = Infinity) => {
     narrowDis = distance;
-    if (pm === GFXPrimitiveMode.TRIANGLE_LIST) {
+    if (pm === gfx.PrimitiveMode.TRIANGLE_LIST) {
         const cnt = ib.length;
         for (let j = 0; j < cnt; j += 3) {
             const i0 = ib[j] * 3;
@@ -26,7 +26,7 @@ const narrowphase = (vb: Float32Array, ib: IBArray, pm: GFXPrimitiveMode, sides:
             if (dist <= 0 || dist >= narrowDis) { continue; }
             narrowDis = dist;
         }
-    } else if (pm === GFXPrimitiveMode.TRIANGLE_STRIP) {
+    } else if (pm === gfx.PrimitiveMode.TRIANGLE_STRIP) {
         const cnt = ib.length - 2;
         let rev = 0;
         for (let j = 0; j < cnt; j += 1) {
@@ -41,7 +41,7 @@ const narrowphase = (vb: Float32Array, ib: IBArray, pm: GFXPrimitiveMode, sides:
             if (dist <= 0 || dist >= narrowDis) { continue; }
             narrowDis = dist;
         }
-    } else if (pm === GFXPrimitiveMode.TRIANGLE_FAN) {
+    } else if (pm === gfx.PrimitiveMode.TRIANGLE_FAN) {
         const cnt = ib.length - 1;
         const i0 = ib[0] * 3;
         Vec3.set(tri.a, vb[i0], vb[i0 + 1], vb[i0 + 2]);
@@ -161,5 +161,5 @@ export default {
             };
         }
         return null;
-    }
+    },
 }
