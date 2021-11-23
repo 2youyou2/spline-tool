@@ -1,12 +1,11 @@
 {
-  "ver": "4.0.22",
+  "ver": "4.0.23",
   "importer": "typescript",
   "imported": true,
   "uuid": "c7ffa9ec-6c7b-4ef2-8796-ef334c315007",
   "files": [],
   "subMetas": {},
   "userData": {
-    "importAsPlugin": false,
     "moduleId": "project:///assets/spline/src/comps/spline-util-renderer.js",
     "importerSettings": 7,
     "simulateGlobals": []

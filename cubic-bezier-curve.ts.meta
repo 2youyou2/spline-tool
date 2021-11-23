@@ -1,12 +1,11 @@
 {
-  "ver": "4.0.22",
+  "ver": "4.0.23",
   "importer": "typescript",
   "imported": true,
   "uuid": "5325f2df-3768-422b-9612-00c404d1f7d8",
   "files": [],
   "subMetas": {},
   "userData": {
-    "importAsPlugin": false,
     "moduleId": "project:///assets/spline/src/cubic-bezier-curve.js",
     "importerSettings": 7,
     "simulateGlobals": []

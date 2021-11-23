@@ -1,12 +1,11 @@
 {
-  "ver": "4.0.22",
+  "ver": "4.0.23",
   "importer": "typescript",
   "imported": true,
   "uuid": "4915af85-e874-4a3a-aced-86bb5e7a2d6f",
   "files": [],
   "subMetas": {},
   "userData": {
-    "importAsPlugin": false,
     "moduleId": "project:///assets/spline/src/editor/asset-operation.js",
     "importerSettings": 7,
     "simulateGlobals": []

@@ -1,12 +1,11 @@
 {
-  "ver": "4.0.22",
+  "ver": "4.0.23",
   "importer": "typescript",
   "imported": true,
   "uuid": "f472239c-905a-46a9-bd1d-401f94022fd2",
   "files": [],
   "subMetas": {},
   "userData": {
-    "importAsPlugin": false,
     "moduleId": "project:///assets/spline/src/spline-smoother.js",
     "importerSettings": 7,
     "simulateGlobals": []

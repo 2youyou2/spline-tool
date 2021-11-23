@@ -1,12 +1,11 @@
 {
-  "ver": "4.0.22",
+  "ver": "4.0.23",
   "importer": "typescript",
   "imported": true,
   "uuid": "a0f005aa-0131-413b-9e78-049eb603c81f",
   "files": [],
   "subMetas": {},
   "userData": {
-    "importAsPlugin": false,
     "moduleId": "project:///assets/spline/src/utils/mesh-processing/mesh-vertex.js",
     "importerSettings": 7,
     "simulateGlobals": []

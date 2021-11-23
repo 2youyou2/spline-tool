@@ -1,12 +1,11 @@
 {
-  "ver": "4.0.22",
+  "ver": "4.0.23",
   "importer": "typescript",
   "imported": true,
   "uuid": "909c3e77-f41f-4704-88ca-3691ec40f2c7",
   "files": [],
   "subMetas": {},
   "userData": {
-    "importAsPlugin": false,
     "moduleId": "project:///assets/spline/src/utils/pool.js",
     "importerSettings": 7,
     "simulateGlobals": []

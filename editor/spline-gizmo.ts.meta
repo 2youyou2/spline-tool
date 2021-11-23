@@ -1,12 +1,11 @@
 {
-  "ver": "4.0.22",
+  "ver": "4.0.23",
   "importer": "typescript",
   "imported": true,
   "uuid": "646b18dd-5408-448d-839a-1cdccb8b5491",
   "files": [],
   "subMetas": {},
   "userData": {
-    "importAsPlugin": false,
     "moduleId": "project:///assets/spline/src/editor/spline-gizmo.js",
     "importerSettings": 7,
     "simulateGlobals": []
